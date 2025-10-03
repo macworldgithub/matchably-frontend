@@ -1,0 +1,6 @@
+# dotenv environment variables file
+.env
+.env.*  # Ignore all env files (optional, if you use multiple envs)
+node_modules/
+dist/
+build/

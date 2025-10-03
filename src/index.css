@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  --background : rgb(0, 0, 0);
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  /* background-color: #242424; */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+body{
+  width: 100vw;
+  height: 100vh;
+  background: var(--background);
+  overflow-x: hidden;
+  
+}
+
+.FontNoto{
+  font-family: "Noto Sans", sans-serif;
+  font-weight: 560;
+}
+
+.FontLato {
+    font-family: "Lato", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+.divider {
+  margin: 48px 0;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.divider.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

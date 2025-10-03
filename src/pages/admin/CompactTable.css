@@ -1,0 +1,15 @@
+.compact-table th,
+.compact-table td {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+.compact-table select,
+.compact-table input[type="text"],
+.compact-table input[type="checkbox"] {
+  font-size: 0.875rem;
+}
+.compact-table button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
