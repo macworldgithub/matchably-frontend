@@ -108,6 +108,7 @@ import SubmissionDelays from "./pages/admin/SubmissionDelays";
 import RecommendationSettings from "./pages/admin/RecommendationSettings";
 import ExclusionsWhitelist from "./pages/admin/ExclusionsWhitelist";
 import TikTokManagement from "./pages/admin/TikTokManagement";
+import BrandSocialLinks from "./pages/BrandSocialLinks";
 
 const URL = config.BACKEND_URL;
 
@@ -170,7 +171,10 @@ function Layout() {
 
         <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route path="/auth/tiktok/callback" element={<TikTokCallback />} />
-        <Route path="/auth/instagram/callback" element={<InstagramCallback />} />
+        <Route
+          path="/auth/instagram/callback"
+          element={<InstagramCallback />}
+        />
         <Route path="/campaigns" element={<CampaignList />} />
         <Route
           path="/campaigns/gifted"
@@ -212,7 +216,7 @@ function Layout() {
             </BrandAuthChecker>
           }
         />
-
+        <Route path="/social-links" element={<BrandSocialLinks />} />
         {/* Protected Brand Dashboard */}
         <Route
           path="/brand/*"

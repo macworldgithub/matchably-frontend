@@ -75,7 +75,7 @@ export default function BrandSignup() {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    navigate("/brand-auth");
+    navigate("/social-links");
   };
 
   return (
@@ -102,33 +102,33 @@ export default function BrandSignup() {
 
       {/* Modal */}
       {showModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="bg-[#1e1e1e] text-white p-6 rounded-2xl shadow-xl w-[90%] max-w-md relative">
-      <button
-        onClick={handleCloseModal}
-        className="absolute top-3 right-4 text-white text-2xl hover:text-red-500 transition"
-        aria-label="Close"
-      >
-        ✖
-      </button>
-      <div className="flex flex-col items-center text-center">
-        <div className="text-4xl mb-2">🎉</div>
+        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#1e1e1e] text-white p-6 rounded-2xl shadow-xl w-[90%] max-w-md relative">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-3 right-4 text-white text-2xl hover:text-red-500 transition"
+              aria-label="Close"
+            >
+              ✖
+            </button>
+            <div className="flex flex-col items-center text-center">
+              <div className="text-4xl mb-2">🎉</div>
         <h2 className="text-xl font-semibold mb-2">Registration Received!</h2>
-        <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-300 mb-4 leading-relaxed">
           Our team will review your application within <span className="text-indigo-400 font-medium">24 hours</span>.
           <br />You'll receive a confirmation email once your brand is approved.
-        </p>
+              </p>
         <div className="text-yellow-300 text-lg mb-4">Thank you for joining <span className="font-bold text-white">Matchably</span>! 💼✨</div>
-        <button
-          onClick={handleCloseModal}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-medium transition"
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                onClick={handleCloseModal}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-medium transition"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
