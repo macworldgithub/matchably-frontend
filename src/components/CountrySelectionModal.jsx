@@ -2,9 +2,11 @@ import React, { useState, useMemo } from "react";
 import Select from "react-select";
 import countryList from "react-select-country-list";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import config from "../config";
 
 const CountrySelectionModal = ({ isOpen, onClose, onSuccess, token }) => {
+  const navigate = useNavigate();
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,9 +34,9 @@ const CountrySelectionModal = ({ isOpen, onClose, onSuccess, token }) => {
       const data = await res.json();
 
       if (data.status === "success") {
-        // Don't show duplicate toast - parent component handles success message
         onSuccess(data.user);
         onClose();
+        navigate("/social-links");
       } else {
         toast.error(data.message || "Failed to update country", {
           theme: "dark",
@@ -46,6 +48,11 @@ const CountrySelectionModal = ({ isOpen, onClose, onSuccess, token }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSkip = () => {
+    onClose();
+    navigate("/social-links"); 
   };
 
   if (!isOpen) return null;
@@ -104,7 +111,7 @@ const CountrySelectionModal = ({ isOpen, onClose, onSuccess, token }) => {
 
           <div className="flex gap-3 pt-4">
             <button
-              onClick={onClose}
+              onClick={handleSkip}
               className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
               disabled={loading}
             >
