@@ -73,7 +73,7 @@ const MyAccount = ({ user }) => {
   const checkAccessRequestStatus = async () => {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await fetch(`${config.BACKEND_URL}/car/status`, {
+      const res = await fetch(`${config.BACKEND_URL}/api/car/status`, {
         headers: { authorization: token },
       });
       const data = await res.json();

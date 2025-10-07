@@ -100,7 +100,7 @@ const CampaignList = ({ type }) => {
   const checkAccessRequestStatus = useCallback(async () => {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await axios.get(`${config.BACKEND_URL}/car/status`, {
+      const res = await axios.get(`${config.BACKEND_URL}/api/car/status`, {
         headers: { authorization: token },
       });
       if (res.data.status === "success") {
