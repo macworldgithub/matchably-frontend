@@ -20,7 +20,7 @@ const CountrySelectionModal = ({ isOpen, onClose, onSuccess, token }) => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/auth/update-country`, {
+      const res = await fetch(`${config.BACKEND_URL}/auth/update-country`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

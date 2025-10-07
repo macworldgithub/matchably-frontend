@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { FaSearch, FaSort, FaTrash, FaTimes } from 'react-icons/fa';
-import axios from 'axios';
-import config from '../../config';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { FaSearch, FaSort, FaTrash, FaTimes } from "react-icons/fa";
+import axios from "axios";
+import config from "../../config";
 
 export default function BrandCampaigns() {
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('deadline');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("deadline");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState(null);
@@ -28,16 +28,16 @@ export default function BrandCampaigns() {
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('BRAND_TOKEN');
+      const token = localStorage.getItem("BRAND_TOKEN");
 
       // Fetch campaigns from API
-      const res = await axios.get(`${config.BACKEND_URL}/api/brand/campaigns`, {
+      const res = await axios.get(`${config.BACKEND_URL}/brand/campaigns`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.data.status === 'success' && res.data.campaigns) {
+      if (res.data.status === "success" && res.data.campaigns) {
         // Transform API data to match frontend expectations
-        const transformedCampaigns = res.data.campaigns.map(campaign => ({
+        const transformedCampaigns = res.data.campaigns.map((campaign) => ({
           id: campaign.id,
           title: campaign.title,
           status: campaign.status,
@@ -53,7 +53,7 @@ export default function BrandCampaigns() {
           targetAudience: campaign.targetAudience,
           requirements: campaign.requirements,
           approvalStatus: campaign?.status,
-          submissionRate: campaign.submissionRate || 0
+          submissionRate: campaign.submissionRate || 0,
         }));
 
         setCampaigns(transformedCampaigns);
@@ -61,19 +61,19 @@ export default function BrandCampaigns() {
         setCampaigns([]);
       }
     } catch (error) {
-      console.error('Error fetching campaigns:', error);
+      console.error("Error fetching campaigns:", error);
       setCampaigns([]);
     } finally {
       setLoading(false);
     }
   };
 
-
-
   // Calculate submission rate according to specification
   const calculateSubmissionRate = (campaign) => {
     if (campaign.approvedCreators === 0) return null;
-    return Math.round((campaign.submittedCreators / campaign.approvedCreators) * 100);
+    return Math.round(
+      (campaign.submittedCreators / campaign.approvedCreators) * 100
+    );
   };
 
   // Delete campaign functionality
@@ -88,13 +88,17 @@ export default function BrandCampaigns() {
 
     setDeleting(true);
     try {
-      const token = localStorage.getItem('BRAND_TOKEN');
+      const token = localStorage.getItem("BRAND_TOKEN");
 
       // Determine which API to use based on campaign ID type
       let deleteUrl;
-      if (typeof campaignToDelete.id === 'number' || (typeof campaignToDelete.id === 'string' && campaignToDelete.id.length < 24)) {
+      if (
+        typeof campaignToDelete.id === "number" ||
+        (typeof campaignToDelete.id === "string" &&
+          campaignToDelete.id.length < 24)
+      ) {
         // Mock campaign - use mock API
-        deleteUrl = `${config.BACKEND_URL}/api/brand/campaigns/${campaignToDelete.id}`;
+        deleteUrl = `${config.BACKEND_URL}/brand/campaigns/${campaignToDelete.id}`;
       } else {
         // Real campaign - use real API
         deleteUrl = `${config.BACKEND_URL}/brand/campaign-request/request/${campaignToDelete.id}`;
@@ -104,18 +108,20 @@ export default function BrandCampaigns() {
         headers: { authorization: `Bearer ${token}` },
       });
 
-      if (res.data.status === 'success') {
+      if (res.data.status === "success") {
         // Optimistic UI update
-        setCampaigns(prev => prev.filter(c => c.id !== campaignToDelete.id));
+        setCampaigns((prev) =>
+          prev.filter((c) => c.id !== campaignToDelete.id)
+        );
         setShowDeleteModal(false);
         setCampaignToDelete(null);
-        alert('Campaign deleted successfully');
+        alert("Campaign deleted successfully");
       } else {
-        alert(res.data.message || 'Failed to delete campaign');
+        alert(res.data.message || "Failed to delete campaign");
       }
     } catch (error) {
-      console.error('Error deleting campaign:', error);
-      alert('Failed to delete campaign');
+      console.error("Error deleting campaign:", error);
+      alert("Failed to delete campaign");
     } finally {
       setDeleting(false);
     }
@@ -123,32 +129,35 @@ export default function BrandCampaigns() {
 
   // Filter and search logic
   const filteredCampaigns = campaigns
-    .filter(campaign => {
-      if (filterStatus === 'All') return true;
+    .filter((campaign) => {
+      if (filterStatus === "All") return true;
       return campaign.status.toLowerCase() === filterStatus.toLowerCase();
     })
-    .filter(campaign => {
+    .filter((campaign) => {
       if (!searchTerm) return true;
-      return campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             (campaign.productName && campaign.productName.toLowerCase().includes(searchTerm.toLowerCase()));
+      return (
+        campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (campaign.productName &&
+          campaign.productName.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     })
     .sort((a, b) => {
-      const multiplier = sortOrder === 'asc' ? 1 : -1;
+      const multiplier = sortOrder === "asc" ? 1 : -1;
 
-      if (sortBy === 'deadline') {
+      if (sortBy === "deadline") {
         if (!a.deadline && !b.deadline) return 0;
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;
         return (new Date(a.deadline) - new Date(b.deadline)) * multiplier;
       }
 
-      if (sortBy === 'submissionRate') {
+      if (sortBy === "submissionRate") {
         const aRate = calculateSubmissionRate(a) || 0;
         const bRate = calculateSubmissionRate(b) || 0;
         return (aRate - bRate) * multiplier;
       }
 
-      if (sortBy === 'createdAt') {
+      if (sortBy === "createdAt") {
         return (new Date(a.createdAt) - new Date(b.createdAt)) * multiplier;
       }
 
@@ -163,25 +172,33 @@ export default function BrandCampaigns() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'active': return '🟢';
-      case 'draft': return '📝';
-      case 'completed': return '✅';
-      default: return '⚪';
+      case "active":
+        return "🟢";
+      case "draft":
+        return "📝";
+      case "completed":
+        return "✅";
+      default:
+        return "⚪";
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'text-green-400';
-      case 'draft': return 'text-yellow-400';
-      case 'completed': return 'text-blue-400';
-      default: return 'text-gray-400';
+      case "active":
+        return "text-green-400";
+      case "draft":
+        return "text-yellow-400";
+      case "completed":
+        return "text-blue-400";
+      default:
+        return "text-gray-400";
     }
   };
 
   const handleCampaignClick = (campaignId) => {
     // Always navigate to the same route as tasks dashboard
-      navigate(`/brand/campaigns/${campaignId}`);
+    navigate(`/brand/campaigns/${campaignId}`);
   };
 
   return (
@@ -207,14 +224,14 @@ export default function BrandCampaigns() {
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             {/* Status Filters */}
             <div className="flex flex-wrap gap-2">
-              {['All', 'Active', 'Draft', 'Completed'].map(status => (
+              {["All", "Active", "Draft", "Completed"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 FontNoto ${
                     filterStatus === status
-                      ? 'bg-lime-500 text-black'
-                      : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                      ? "bg-lime-500 text-black"
+                      : "bg-white/10 text-gray-300 hover:bg-white/20"
                   }`}
                 >
                   {status}
@@ -245,12 +262,18 @@ export default function BrandCampaigns() {
                 >
                   <option value="deadline">Sort by Deadline</option>
                   <option value="createdAt">Sort by Creation Date</option>
-                  <option value="submissionRate">Sort by Submission Rate</option>
+                  <option value="submissionRate">
+                    Sort by Submission Rate
+                  </option>
                 </select>
                 <button
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  onClick={() =>
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                  }
                   className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-colors"
-                  title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                  title={`Sort ${
+                    sortOrder === "asc" ? "Descending" : "Ascending"
+                  }`}
                 >
                   <FaSort />
                 </button>
@@ -267,7 +290,9 @@ export default function BrandCampaigns() {
         ) : currentCampaigns.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-xl text-gray-400 FontNoto mb-4">
-              {filterStatus === 'All' ? 'No campaigns found' : `No ${filterStatus.toLowerCase()} campaigns found`}
+              {filterStatus === "All"
+                ? "No campaigns found"
+                : `No ${filterStatus.toLowerCase()} campaigns found`}
             </p>
             {searchTerm && (
               <p className="text-gray-500 FontNoto">
@@ -278,7 +303,7 @@ export default function BrandCampaigns() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {currentCampaigns.map(campaign => (
+              {currentCampaigns.map((campaign) => (
                 <div
                   key={campaign.id}
                   onClick={() => handleCampaignClick(campaign.id)}
@@ -288,13 +313,19 @@ export default function BrandCampaigns() {
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{getStatusIcon(campaign.status)}</span>
-                        <span className={`font-semibold capitalize FontNoto ${getStatusColor(campaign.status)}`}>
+                        <span className="text-lg">
+                          {getStatusIcon(campaign.status)}
+                        </span>
+                        <span
+                          className={`font-semibold capitalize FontNoto ${getStatusColor(
+                            campaign.status
+                          )}`}
+                        >
                           [{campaign.status}]
                         </span>
                       </div>
                       {/* Delete button for draft campaigns */}
-                      {campaign.status === 'draft' && (
+                      {campaign.status === "draft" && (
                         <button
                           onClick={(e) => handleDeleteClick(e, campaign)}
                           className="text-red-400 hover:text-red-300 p-1 hover:bg-red-500/20 rounded transition-colors"
@@ -312,19 +343,31 @@ export default function BrandCampaigns() {
                   {/* Dates */}
                   <div className="mb-4 space-y-1">
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-400 FontNoto">📆 Created:</span>
-                      <span className="text-gray-300 FontNoto">{campaign.createdAt}</span>
+                      <span className="text-gray-400 FontNoto">
+                        📆 Created:
+                      </span>
+                      <span className="text-gray-300 FontNoto">
+                        {campaign.createdAt}
+                      </span>
                       {campaign.deadline && (
                         <>
-                          <span className="text-gray-400 FontNoto">| Deadline:</span>
-                          <span className="text-gray-300 FontNoto">{campaign.deadline}</span>
+                          <span className="text-gray-400 FontNoto">
+                            | Deadline:
+                          </span>
+                          <span className="text-gray-300 FontNoto">
+                            {campaign.deadline}
+                          </span>
                         </>
                       )}
                     </div>
                     {campaign.endedAt && (
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400 FontNoto">🏁 Ended:</span>
-                        <span className="text-gray-300 FontNoto">{campaign.endedAt}</span>
+                        <span className="text-gray-400 FontNoto">
+                          🏁 Ended:
+                        </span>
+                        <span className="text-gray-300 FontNoto">
+                          {campaign.endedAt}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -333,12 +376,18 @@ export default function BrandCampaigns() {
                   <div className="mb-4">
                     <div className="flex items-center gap-2 text-sm mb-2">
                       <span className="text-gray-400 FontNoto">👥</span>
-                      <span className="text-lime-400 font-semibold FontNoto">{campaign.creators} Creators</span>
+                      <span className="text-lime-400 font-semibold FontNoto">
+                        {campaign.creators} Creators
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-400 FontNoto">📈 Submission Rate:</span>
+                      <span className="text-gray-400 FontNoto">
+                        📈 Submission Rate:
+                      </span>
                       <span className="text-lime-400 font-semibold FontNoto">
-                        {calculateSubmissionRate(campaign) ? `${calculateSubmissionRate(campaign)}%` : '—'}
+                        {calculateSubmissionRate(campaign)
+                          ? `${calculateSubmissionRate(campaign)}%`
+                          : "—"}
                       </span>
                     </div>
                   </div>
@@ -360,8 +409,8 @@ export default function BrandCampaigns() {
                     onClick={() => setCurrentPage(index + 1)}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 FontNoto ${
                       currentPage === index + 1
-                        ? 'bg-lime-500 text-black'
-                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                        ? "bg-lime-500 text-black"
+                        : "bg-white/10 text-gray-300 hover:bg-white/20"
                     }`}
                   >
                     {index + 1}
@@ -391,11 +440,13 @@ export default function BrandCampaigns() {
 
               <div className="mb-6">
                 <p className="text-gray-300 FontNoto mb-4">
-                  Are you sure you want to delete the campaign "{campaignToDelete?.title}"?
+                  Are you sure you want to delete the campaign "
+                  {campaignToDelete?.title}"?
                 </p>
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                   <p className="text-red-400 text-sm FontNoto">
-                    ⚠️ This action cannot be undone. All campaign data will be permanently deleted.
+                    ⚠️ This action cannot be undone. All campaign data will be
+                    permanently deleted.
                   </p>
                 </div>
               </div>
@@ -406,7 +457,7 @@ export default function BrandCampaigns() {
                   disabled={deleting}
                   className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg FontNoto font-medium transition-colors duration-200"
                 >
-                  {deleting ? 'Deleting...' : 'Delete Campaign'}
+                  {deleting ? "Deleting..." : "Delete Campaign"}
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(false)}

@@ -81,7 +81,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/auth/signup`, {
+      const res = await fetch(`${config.BACKEND_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -139,7 +139,7 @@ export default function Signup() {
 
   const handleGoogleSignup = async (idToken) => {
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/auth/google-auth`, {
+      const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -171,7 +171,9 @@ export default function Signup() {
       } else if (data.status === "pending_urls") {
         // New Google user needs URL submission
         localStorage.setItem("token", data.token);
-        toast.info("Welcome! Please submit 3 URLs to get started", { theme: "dark" });
+        toast.info("Welcome! Please submit 3 URLs to get started", {
+          theme: "dark",
+        });
         setTimeout(() => {
           Navigate("/onboarding?step=1");
         }, 2000);
@@ -184,7 +186,9 @@ export default function Signup() {
       }
     } catch (err) {
       console.error("Google signup error:", err);
-      toast.error(`Google signup failed: ${err.message || 'Unknown error'}`, { theme: "dark" });
+      toast.error(`Google signup failed: ${err.message || "Unknown error"}`, {
+        theme: "dark",
+      });
     }
   };
 

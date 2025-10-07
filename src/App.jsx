@@ -392,7 +392,7 @@ function AdminAuthChecker({ children }) {
     async function verifyLogin() {
       try {
         const token = Cookie.get("AdminToken");
-        const res = await axios.get(`${URL}/admin/verify`, {
+        const res = await axios.get(`${URL}/api/admin/verify`, {
           headers: { authorization: token },
         });
         if (res.data.status === "success") return setLoading(false);

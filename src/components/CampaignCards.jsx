@@ -55,7 +55,7 @@ export default function CampaignCards({ campaigns, onCampaignClick, onCampaignDe
     setDeletingId(campaignToDelete.id);
     try {
       const token = localStorage.getItem('BRAND_TOKEN');
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/campaigns/${campaignToDelete.id}`, {
+      const res = await fetch(`${config.BACKEND_URL}/brand/campaigns/${campaignToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

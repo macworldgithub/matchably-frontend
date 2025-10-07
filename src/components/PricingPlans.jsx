@@ -49,7 +49,7 @@ export default function PricingPlans() {
       return;
     }
     try {
-      const res = await axios.get(`${config.BACKEND_URL}/api/brand/auth/verify`, {
+      const res = await axios.get(`${config.BACKEND_URL}/brand/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.status === "success" && res.data.brand) {

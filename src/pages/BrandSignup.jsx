@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import config from "../config";
-import { CheckCircle, X } from 'lucide-react'; // Icon library (if using Lucide)
-
+import { CheckCircle, X } from "lucide-react"; // Icon library (if using Lucide)
 
 export default function BrandSignup() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export default function BrandSignup() {
     website: "",
     productCategory: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,9 +41,9 @@ export default function BrandSignup() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${config.BACKEND_URL}/brand/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyName: formData.companyName,
           contactName: formData.contactName,
@@ -52,12 +51,12 @@ export default function BrandSignup() {
           phone: formData.phone,
           website: formData.website,
           productCategory: formData.productCategory,
-          password: formData.password
-        })
+          password: formData.password,
+        }),
       });
       const data = await res.json();
-      if (!res.ok || data.status === 'failed') {
-        setError(data.message || 'Signup failed');
+      if (!res.ok || data.status === "failed") {
+        setError(data.message || "Signup failed");
         setLoading(false);
         return;
       }
@@ -66,8 +65,8 @@ export default function BrandSignup() {
       localStorage.setItem("brandSignupPopupShown", "true");
       setShowModal(true);
     } catch (err) {
-      console.error('Signup error:', err);
-      setError('An unexpected error occurred');
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -81,22 +80,74 @@ export default function BrandSignup() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
       <div className="bg-[#ffffff1b] p-6 rounded-lg w-[90%] max-w-md">
-        <h2 className="text-center text-xl font-bold mb-6">Register Your Brand</h2>
+        <h2 className="text-center text-xl font-bold mb-6">
+          Register Your Brand
+        </h2>
         {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input name="companyName" placeholder="Your Company Name*" value={formData.companyName} onChange={handleChange} required className="w-full p-2 bg-gray-800 rounded" />
-          <input name="contactName" placeholder="Your Full Name*" value={formData.contactName} onChange={handleChange} required className="w-full p-2 bg-gray-800 rounded" />
-          <input name="email" type="email" placeholder="Business Email*" value={formData.email} onChange={handleChange} required className="w-full p-2 bg-gray-800 rounded" />
-          <input name="website" placeholder="Company Website" value={formData.website} onChange={handleChange} className="w-full p-2 bg-gray-800 rounded" />
-          <input name="password" type="password" placeholder="Create a Password*" value={formData.password} onChange={handleChange} required className="w-full p-2 bg-gray-800 rounded" />
-          <input name="confirmPassword" type="password" placeholder="Confirm Your Password*" value={formData.confirmPassword} onChange={handleChange} required className="w-full p-2 bg-gray-800 rounded" />
-          <button type="submit" className="w-full bg-indigo-600 p-2 rounded disabled:opacity-50" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit'}
+          <input
+            name="companyName"
+            placeholder="Your Company Name*"
+            value={formData.companyName}
+            onChange={handleChange}
+            required
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <input
+            name="contactName"
+            placeholder="Your Full Name*"
+            value={formData.contactName}
+            onChange={handleChange}
+            required
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Business Email*"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <input
+            name="website"
+            placeholder="Company Website"
+            value={formData.website}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Create a Password*"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <input
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm Your Password*"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            className="w-full p-2 bg-gray-800 rounded"
+          />
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 p-2 rounded disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit"}
           </button>
         </form>
         <p className="text-sm mt-4 text-center">
-          Already have an account?{' '}
-          <a href="/brand-auth" className="text-indigo-400 underline">Sign In</a>
+          Already have an account?{" "}
+          <a href="/brand-auth" className="text-indigo-400 underline">
+            Sign In
+          </a>
         </p>
       </div>
 
@@ -113,12 +164,19 @@ export default function BrandSignup() {
             </button>
             <div className="flex flex-col items-center text-center">
               <div className="text-4xl mb-2">🎉</div>
-        <h2 className="text-xl font-semibold mb-2">Registration Received!</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                Registration Received!
+              </h2>
               <p className="text-sm text-gray-300 mb-4 leading-relaxed">
-          Our team will review your application within <span className="text-indigo-400 font-medium">24 hours</span>.
-          <br />You'll receive a confirmation email once your brand is approved.
+                Our team will review your application within{" "}
+                <span className="text-indigo-400 font-medium">24 hours</span>.
+                <br />
+                You'll receive a confirmation email once your brand is approved.
               </p>
-        <div className="text-yellow-300 text-lg mb-4">Thank you for joining <span className="font-bold text-white">Matchably</span>! 💼✨</div>
+              <div className="text-yellow-300 text-lg mb-4">
+                Thank you for joining{" "}
+                <span className="font-bold text-white">Matchably</span>! 💼✨
+              </div>
               <button
                 onClick={handleCloseModal}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-medium transition"
@@ -129,7 +187,6 @@ export default function BrandSignup() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

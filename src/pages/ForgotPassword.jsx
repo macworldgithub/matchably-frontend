@@ -4,7 +4,6 @@ import config from "../config";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 
-
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -14,14 +13,14 @@ const ForgotPassword = () => {
     e.preventDefault();
     if (!email) return toast.error("Please enter your email.");
 
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!isValidEmail) {
-    return toast.error("Please enter a valid email address.");
-  }
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail) {
+      return toast.error("Please enter a valid email address.");
+    }
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${config.BACKEND_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -30,13 +29,17 @@ const ForgotPassword = () => {
       const data = await res.json();
 
       if (res.ok && data.status === "success") {
-        toast.success("Temporary password sent to your email.", { theme: "dark" });
+        toast.success("Temporary password sent to your email.", {
+          theme: "dark",
+        });
         // 👇 Navigate to Signin after 2 seconds
-      setTimeout(() => {
-        navigate("/signin");
-      }, 1000);
+        setTimeout(() => {
+          navigate("/signin");
+        }, 1000);
       } else {
-        toast.error(data.message || "Failed to send reset email.", { theme: "dark" });
+        toast.error(data.message || "Failed to send reset email.", {
+          theme: "dark",
+        });
       }
     } catch (err) {
       console.error("Forgot password error:", err);
@@ -52,7 +55,10 @@ const ForgotPassword = () => {
         <title>Forgot Password | Matchably</title>
       </Helmet>
 
-      <form onSubmit={handleSubmit} className="bg-[#ffffff1b] p-6 rounded-lg w-[90%] md:w-[400px] text-white">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#ffffff1b] p-6 rounded-lg w-[90%] md:w-[400px] text-white"
+      >
         <h2 className="text-xl font-bold mb-4 text-center">Forgot Password</h2>
         <p className="text-sm text-gray-300 mb-6 text-center">
           Enter your email and we'll send you a temporary password.

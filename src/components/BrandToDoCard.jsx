@@ -14,7 +14,7 @@ export default function BrandToDoCard() {
   const fetchTodos = async () => {
     try {
       const token = localStorage.getItem('BRAND_TOKEN');
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/todos/summary`, {
+      const res = await fetch(`${config.BACKEND_URL}/brand/todos/summary`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
