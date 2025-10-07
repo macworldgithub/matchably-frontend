@@ -10,7 +10,7 @@ import useAuthStore from "../state/atoms";
 export default function OnboardingFlow() {
   const Navigate = useNavigate();
   const location = useLocation();
-  const { User } = useAuthStore();
+  const { User, verifyLogin } = useAuthStore();
 
   const queryParams = new URLSearchParams(location.search);
   const queryStep = parseInt(queryParams.get("step"), 10);
@@ -386,10 +386,16 @@ export default function OnboardingFlow() {
               🎉 All Set!
             </h2>
             <p className="text-gray-300 text-sm mb-6 text-center">
-              You’re ready to be recommended to brands.
+              You're ready to be recommended to brands.
             </p>
             <button
-              onClick={() => Navigate("/myaccount")}
+              onClick={async () => {
+                // Refresh user login state before navigating
+                if (verifyLogin) {
+                  await verifyLogin();
+                }
+                Navigate("/myaccount", { replace: true });
+              }}
               className="w-full p-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-semibold"
             >
               Go to Dashboard

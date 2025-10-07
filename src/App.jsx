@@ -379,9 +379,22 @@ function SidebarLink({ to, icon, label }) {
 
 function AuthChecker({ children, isLogin }) {
   const navigate = useNavigate();
+  
   useEffect(() => {
-    if (!isLogin) navigate("/signin");
-  }, [isLogin, navigate]);
+    // Only redirect if no token exists at all
+    const token = Cookie.get("token") || localStorage.getItem("token");
+    
+    if (!token) {
+      navigate("/signin");
+    }
+  }, [navigate]);
+
+  // If token exists, allow access even if isLogin is still being verified
+  const token = Cookie.get("token") || localStorage.getItem("token");
+  if (!token && !isLogin) {
+    return null;
+  }
+
   return <>{children}</>;
 }
 
