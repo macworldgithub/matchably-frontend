@@ -33,7 +33,7 @@ const ApprovedContentManagement = () => {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
       const res = await fetch(
-        `${config.BACKEND_URL}/api/admin/users/approved-content?page=${currentPage}&search=${searchTerm}&limit=20`,
+        `${config.BACKEND_URL}/admin/users/approved-content?page=${currentPage}&search=${searchTerm}&limit=20`,
         {
           headers: { Authorization: token },
         }
@@ -58,7 +58,7 @@ const ApprovedContentManagement = () => {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
       const res = await fetch(
-        `${config.BACKEND_URL}/api/admin/stats/approved-content`,
+        `${config.BACKEND_URL}/admin/stats/approved-content`,
         {
           headers: { Authorization: token },
         }
@@ -109,7 +109,7 @@ const ApprovedContentManagement = () => {
       }
 
       const res = await fetch(
-        `${config.BACKEND_URL}/api/admin/users/${userId}/approved-content`,
+        `${config.BACKEND_URL}/admin/users/${userId}/approved-content`,
         {
           method: "PUT",
           headers: {
@@ -403,4 +403,3 @@ const ApprovedContentManagement = () => {
 };
 
 export default ApprovedContentManagement;
-

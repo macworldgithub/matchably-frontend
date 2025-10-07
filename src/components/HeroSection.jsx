@@ -17,7 +17,7 @@ export default function HeroSection() {
         return;
       }
       try {
-        const res = await axios.get(`${config.BACKEND_URL}/api/brand/auth/verify`, {
+        const res = await axios.get(`${config.BACKEND_URL}/brand/auth/verify`, {
           headers: {
             authorization: `Bearer ${token}`,
           },

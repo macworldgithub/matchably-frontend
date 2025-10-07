@@ -36,7 +36,7 @@ export default function BrandSocialLinks() {
     setShowPopup(false);
 
     // Optionally send to backend
-    // fetch(`${config.BACKEND_URL}/api/brand/social-links`, {...})
+    // fetch(`${config.BACKEND_URL}/brand/social-links`, {...})
 
     // Then go to dashboard
     setTimeout(() => navigate("/brand/dashboard"), 500);

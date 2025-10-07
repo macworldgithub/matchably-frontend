@@ -73,7 +73,7 @@ export default function Signin() {
     setIsProcessingGoogleLogin(true);
 
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/auth/google-auth`, {
+      const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
@@ -116,7 +116,9 @@ export default function Signin() {
       } else if (data.status === "pending_urls") {
         // Redirect to URL submission onboarding
         localStorage.setItem("token", data.token);
-        toast.info("Please submit 3 URLs to complete your profile", { theme: "dark" });
+        toast.info("Please submit 3 URLs to complete your profile", {
+          theme: "dark",
+        });
         navigate("/onboarding?step=1");
       } else {
         const errorMessage = data?.message || "Google login failed";

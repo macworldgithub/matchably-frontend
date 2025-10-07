@@ -1,38 +1,41 @@
 /** @format */
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import config from '../config';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import config from "../config";
 
 const BrandForgetPass = () => {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
-    setError('');
+    setMessage("");
+    setError("");
     setLoading(true);
 
     try {
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const res = await fetch(
+        `${config.BACKEND_URL}/brand/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await res.json();
 
-      if (data.status === 'success') {
+      if (data.status === "success") {
         setMessage(data.message);
       } else {
-        setError(data.message || 'Something went wrong.');
+        setError(data.message || "Something went wrong.");
       }
     } catch (err) {
-      console.error('Forgot password error:', err);
-      setError('An unexpected error occurred. Please try again.');
+      console.error("Forgot password error:", err);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -50,12 +53,18 @@ const BrandForgetPass = () => {
           </p>
         </div>
 
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-        {message && <p className="text-green-500 text-sm mb-4 text-center">{message}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
+        {message && (
+          <p className="text-green-500 text-sm mb-4 text-center">{message}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-300">Work Email</label>
+            <label className="block text-sm mb-1 text-gray-300">
+              Work Email
+            </label>
             <input
               type="email"
               name="email"
@@ -72,7 +81,7 @@ const BrandForgetPass = () => {
             disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-medium py-2 rounded-lg disabled:opacity-50"
           >
-            {loading ? 'Submitting...' : 'Send Temporary Password'}
+            {loading ? "Submitting..." : "Send Temporary Password"}
           </button>
         </form>
 

@@ -21,7 +21,7 @@ const useAuthStore = create((set) => ({
       }
 
       const token = Cookie.get("token") || localStorage.getItem("token");
-      const res = await axios.get(`${BACKEND_URL}/api/auth/verify`, {
+      const res = await axios.get(`${BACKEND_URL}/auth/verify`, {
         headers: {
           Authorization: token, // ✅ capital A
         },

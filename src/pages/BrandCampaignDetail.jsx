@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import config from '../config';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import config from "../config";
 
 export default function BrandCampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -18,40 +18,41 @@ export default function BrandCampaignDetail() {
 
   const fetchCampaign = async () => {
     try {
-      const token = localStorage.getItem('BRAND_TOKEN');
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/campaigns/${id}`, {
+      const token = localStorage.getItem("BRAND_TOKEN");
+      const res = await fetch(`${config.BACKEND_URL}/brand/campaigns/${id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (data.status === 'success') {
+        if (data.status === "success") {
           setCampaign(data.campaign);
         }
       }
     } catch (error) {
-      console.error('Failed to fetch campaign:', error);
+      console.error("Failed to fetch campaign:", error);
       // Mock data for development
       const mockCampaign = {
         id: parseInt(id),
-        title: 'Glow Serum Campaign',
-        status: id === '3' ? 'draft' : 'active',
-        description: 'Promote our new vitamin C glow serum to skincare enthusiasts',
-        deadline: '2024-01-15',
+        title: "Glow Serum Campaign",
+        status: id === "3" ? "draft" : "active",
+        description:
+          "Promote our new vitamin C glow serum to skincare enthusiasts",
+        deadline: "2024-01-15",
         budget: 5000,
-        targetAudience: 'Skincare enthusiasts, ages 18-35',
-        requirements: 'Must have 10K+ followers, skincare niche',
+        targetAudience: "Skincare enthusiasts, ages 18-35",
+        requirements: "Must have 10K+ followers, skincare niche",
         applicants: 12,
         submissions: 8,
         approved: 6,
         pending: 2,
         rejected: 0,
         submissionRate: 67,
-        createdAt: '2024-01-01',
-        updatedAt: '2024-01-10'
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-10",
       };
       setCampaign(mockCampaign);
     } finally {
@@ -62,22 +63,22 @@ export default function BrandCampaignDetail() {
   const handleDeleteCampaign = async () => {
     setDeleting(true);
     try {
-      const token = localStorage.getItem('BRAND_TOKEN');
-      const res = await fetch(`${config.BACKEND_URL}/api/brand/campaigns/${id}`, {
-        method: 'DELETE',
+      const token = localStorage.getItem("BRAND_TOKEN");
+      const res = await fetch(`${config.BACKEND_URL}/brand/campaigns/${id}`, {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (res.ok) {
-        navigate('/brand/dashboard');
+        navigate("/brand/dashboard");
       } else {
-        console.error('Failed to delete campaign');
+        console.error("Failed to delete campaign");
       }
     } catch (error) {
-      console.error('Error deleting campaign:', error);
+      console.error("Error deleting campaign:", error);
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);
@@ -86,28 +87,36 @@ export default function BrandCampaignDetail() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'text-green-400 bg-green-400/10 border-green-400/30';
-      case 'draft': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30';
-      case 'completed': return 'text-blue-400 bg-blue-400/10 border-blue-400/30';
-      default: return 'text-gray-400 bg-gray-400/10 border-gray-400/30';
+      case "active":
+        return "text-green-400 bg-green-400/10 border-green-400/30";
+      case "draft":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/30";
+      case "completed":
+        return "text-blue-400 bg-blue-400/10 border-blue-400/30";
+      default:
+        return "text-gray-400 bg-gray-400/10 border-gray-400/30";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'active': return '🟢';
-      case 'draft': return '📝';
-      case 'completed': return '✅';
-      default: return '⚪';
+      case "active":
+        return "🟢";
+      case "draft":
+        return "📝";
+      case "completed":
+        return "✅";
+      default:
+        return "⚪";
     }
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -122,7 +131,9 @@ export default function BrandCampaignDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-lime-400 text-xl FontNoto">Loading campaign...</div>
+        <div className="text-lime-400 text-xl FontNoto">
+          Loading campaign...
+        </div>
       </div>
     );
   }
@@ -132,10 +143,14 @@ export default function BrandCampaignDetail() {
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
-          <h2 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-2">Campaign Not Found</h2>
-          <p className="text-gray-400 FontNoto mb-6">The campaign you're looking for doesn't exist.</p>
+          <h2 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-2">
+            Campaign Not Found
+          </h2>
+          <p className="text-gray-400 FontNoto mb-6">
+            The campaign you're looking for doesn't exist.
+          </p>
           <button
-            onClick={() => navigate('/brand/dashboard')}
+            onClick={() => navigate("/brand/dashboard")}
             className="bg-lime-500 hover:bg-lime-600 text-white px-6 py-3 rounded-lg FontNoto font-semibold
               transition-colors duration-200"
           >
@@ -159,7 +174,7 @@ export default function BrandCampaignDetail() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/brand/dashboard')}
+              onClick={() => navigate("/brand/dashboard")}
               className="text-gray-400 hover:text-lime-400 transition-colors duration-200"
             >
               ← Back to Dashboard
@@ -169,15 +184,21 @@ export default function BrandCampaignDetail() {
                 {campaign.title}
               </h1>
               <div className="flex items-center gap-4">
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm FontNoto font-semibold border ${getStatusColor(campaign.status)}`}>
+                <div
+                  className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm FontNoto font-semibold border ${getStatusColor(
+                    campaign.status
+                  )}`}
+                >
                   <span>{getStatusIcon(campaign.status)}</span>
                   <span className="capitalize">{campaign.status}</span>
                 </div>
-                {campaign.status === 'active' && (
+                {campaign.status === "active" && (
                   <div className="text-gray-400 FontNoto text-sm">
-                    {daysLeft < 0 ? `${Math.abs(daysLeft)} days overdue` :
-                     daysLeft === 0 ? 'Due today' :
-                     `${daysLeft} days left`}
+                    {daysLeft < 0
+                      ? `${Math.abs(daysLeft)} days overdue`
+                      : daysLeft === 0
+                      ? "Due today"
+                      : `${daysLeft} days left`}
                   </div>
                 )}
               </div>
@@ -185,7 +206,7 @@ export default function BrandCampaignDetail() {
           </div>
 
           <div className="flex items-center gap-3">
-            {campaign.status === 'draft' && (
+            {campaign.status === "draft" && (
               <button
                 onClick={() => setShowDeleteModal(true)}
                 className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg FontNoto
@@ -207,18 +228,19 @@ export default function BrandCampaignDetail() {
         {/* Tabs */}
         <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-lg w-fit">
           {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'applicants', label: 'Applicants', icon: '👥' },
-            { id: 'submissions', label: 'Submissions', icon: '📝' },
-            { id: 'analytics', label: 'Analytics', icon: '📈' }
-          ].map(tab => (
+            { id: "overview", label: "Overview", icon: "📊" },
+            { id: "applicants", label: "Applicants", icon: "👥" },
+            { id: "submissions", label: "Submissions", icon: "📝" },
+            { id: "analytics", label: "Analytics", icon: "📈" },
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-md FontNoto font-medium transition-all duration-200 flex items-center gap-2
-                ${activeTab === tab.id 
-                  ? 'bg-lime-500 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                ${
+                  activeTab === tab.id
+                    ? "bg-lime-500 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-white/10"
                 }`}
             >
               <span>{tab.icon}</span>
@@ -228,33 +250,55 @@ export default function BrandCampaignDetail() {
         </div>
 
         {/* Content */}
-        {activeTab === 'overview' && (
+        {activeTab === "overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Info */}
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <h2 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-4">Campaign Details</h2>
+                <h2 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-4">
+                  Campaign Details
+                </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-gray-400 FontNoto text-sm">Description</label>
-                    <p className="text-gray-200 FontNoto mt-1">{campaign.description}</p>
+                    <label className="text-gray-400 FontNoto text-sm">
+                      Description
+                    </label>
+                    <p className="text-gray-200 FontNoto mt-1">
+                      {campaign.description}
+                    </p>
                   </div>
                   <div>
-                    <label className="text-gray-400 FontNoto text-sm">Target Audience</label>
-                    <p className="text-gray-200 FontNoto mt-1">{campaign.targetAudience}</p>
+                    <label className="text-gray-400 FontNoto text-sm">
+                      Target Audience
+                    </label>
+                    <p className="text-gray-200 FontNoto mt-1">
+                      {campaign.targetAudience}
+                    </p>
                   </div>
                   <div>
-                    <label className="text-gray-400 FontNoto text-sm">Requirements</label>
-                    <p className="text-gray-200 FontNoto mt-1">{campaign.requirements}</p>
+                    <label className="text-gray-400 FontNoto text-sm">
+                      Requirements
+                    </label>
+                    <p className="text-gray-200 FontNoto mt-1">
+                      {campaign.requirements}
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-gray-400 FontNoto text-sm">Budget</label>
-                      <p className="text-lime-400 FontNoto font-semibold mt-1">${campaign.budget?.toLocaleString()}</p>
+                      <label className="text-gray-400 FontNoto text-sm">
+                        Budget
+                      </label>
+                      <p className="text-lime-400 FontNoto font-semibold mt-1">
+                        ${campaign.budget?.toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <label className="text-gray-400 FontNoto text-sm">Deadline</label>
-                      <p className="text-gray-200 FontNoto mt-1">{formatDate(campaign.deadline)}</p>
+                      <label className="text-gray-400 FontNoto text-sm">
+                        Deadline
+                      </label>
+                      <p className="text-gray-200 FontNoto mt-1">
+                        {formatDate(campaign.deadline)}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -264,31 +308,45 @@ export default function BrandCampaignDetail() {
             {/* Stats Sidebar */}
             <div className="space-y-6">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg FontNoto font-bold text-[#E0FFFA] mb-4">Campaign Stats</h3>
+                <h3 className="text-lg FontNoto font-bold text-[#E0FFFA] mb-4">
+                  Campaign Stats
+                </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 FontNoto">Applicants</span>
-                    <span className="text-lime-400 FontNoto font-semibold">{campaign.applicants}</span>
+                    <span className="text-lime-400 FontNoto font-semibold">
+                      {campaign.applicants}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 FontNoto">Submissions</span>
-                    <span className="text-lime-400 FontNoto font-semibold">{campaign.submissions}</span>
+                    <span className="text-lime-400 FontNoto font-semibold">
+                      {campaign.submissions}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 FontNoto">Approved</span>
-                    <span className="text-green-400 FontNoto font-semibold">{campaign.approved}</span>
+                    <span className="text-green-400 FontNoto font-semibold">
+                      {campaign.approved}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 FontNoto">Pending</span>
-                    <span className="text-yellow-400 FontNoto font-semibold">{campaign.pending}</span>
+                    <span className="text-yellow-400 FontNoto font-semibold">
+                      {campaign.pending}
+                    </span>
                   </div>
                   <div className="border-t border-white/10 pt-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-400 FontNoto">Submission Rate</span>
-                      <span className="text-lime-400 FontNoto font-semibold">{campaign.submissionRate}%</span>
+                      <span className="text-gray-400 FontNoto">
+                        Submission Rate
+                      </span>
+                      <span className="text-lime-400 FontNoto font-semibold">
+                        {campaign.submissionRate}%
+                      </span>
                     </div>
                     <div className="w-full bg-white/10 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-lime-400 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${campaign.submissionRate}%` }}
                       ></div>
@@ -301,10 +359,12 @@ export default function BrandCampaignDetail() {
         )}
 
         {/* Other tab content would go here */}
-        {activeTab !== 'overview' && (
+        {activeTab !== "overview" && (
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
             <div className="text-4xl mb-4">🚧</div>
-            <h3 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-2">Coming Soon</h3>
+            <h3 className="text-xl FontNoto font-bold text-[#E0FFFA] mb-2">
+              Coming Soon
+            </h3>
             <p className="text-gray-400 FontNoto">
               The {activeTab} section is under development.
             </p>
@@ -322,9 +382,10 @@ export default function BrandCampaignDetail() {
                 Delete Campaign
               </h3>
               <p className="text-gray-400 FontNoto mb-6">
-                Are you sure you want to delete "{campaign.title}"? This action cannot be undone.
+                Are you sure you want to delete "{campaign.title}"? This action
+                cannot be undone.
               </p>
-              
+
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={() => setShowDeleteModal(false)}
@@ -346,7 +407,7 @@ export default function BrandCampaignDetail() {
                       Deleting...
                     </>
                   ) : (
-                    'Delete Campaign'
+                    "Delete Campaign"
                   )}
                 </button>
               </div>

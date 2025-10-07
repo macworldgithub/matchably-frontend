@@ -50,10 +50,17 @@ export default function OnboardingFlow() {
   // ---- STEP INITIALIZATION ----
   useEffect(() => {
     // Check if user has both submitted URLs AND connected social accounts
-    const hasConnectedAccounts = User?.sns?.instagram?.connected || User?.sns?.tiktok?.connected || User?.snsConnected;
-    
+    const hasConnectedAccounts =
+      User?.sns?.instagram?.connected ||
+      User?.sns?.tiktok?.connected ||
+      User?.snsConnected;
+
     // Only redirect to account if they've completed BOTH URL submission AND social connection (or explicitly want to skip)
-    if (User?.urlsSubmitted && User?.submittedUrls?.length >= 3 && hasConnectedAccounts) {
+    if (
+      User?.urlsSubmitted &&
+      User?.submittedUrls?.length >= 3 &&
+      hasConnectedAccounts
+    ) {
       Navigate("/myaccount", { replace: true });
       return;
     }
@@ -95,7 +102,7 @@ export default function OnboardingFlow() {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
       const res = await fetch(
-        `${config.BACKEND_URL}/api/user/campaigns/submit-urls`,
+        `${config.BACKEND_URL}/user/campaigns/submit-urls`,
         {
           method: "POST",
           headers: {
@@ -126,7 +133,7 @@ export default function OnboardingFlow() {
     if (provider === "tiktok") {
       try {
         const token = Cookies.get("token") || localStorage.getItem("token");
-        const res = await fetch(`${config.BACKEND_URL}/api/social/tiktok/auth`, {
+        const res = await fetch(`${config.BACKEND_URL}/social/tiktok/auth`, {
           headers: { Authorization: token },
         });
         const data = await res.json();
@@ -148,7 +155,7 @@ export default function OnboardingFlow() {
     } else if (provider === "instagram") {
       try {
         const token = Cookies.get("token") || localStorage.getItem("token");
-        const res = await fetch(`${config.BACKEND_URL}/api/social/instagram/auth`, {
+        const res = await fetch(`${config.BACKEND_URL}/social/instagram/auth`, {
           headers: { Authorization: token },
         });
         const data = await res.json();
@@ -175,7 +182,7 @@ export default function OnboardingFlow() {
     try {
       setConnecting(true);
       const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await fetch(`${config.BACKEND_URL}/api/social/status`, {
+      const res = await fetch(`${config.BACKEND_URL}/social/status`, {
         headers: { Authorization: token },
       });
       const data = await res.json();
