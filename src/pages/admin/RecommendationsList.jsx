@@ -1,11 +1,55 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import config from "../../config";
+import Cookie from "js-cookie";
+import { toast } from "react-toastify";
 
 // Props: creators, brands, campaigns fetched from API
-const RecommendationsList = ({ creators, brands, campaigns, onRecalculate, onExclude }) => {
+const RecommendationsList = ({ onRecalculate, onExclude }) => {
   const [platformFilter, setPlatformFilter] = useState("All");
   const [scoreRange, setScoreRange] = useState([0, 100]);
   const [brand, setBrand] = useState("");
   const [campaign, setCampaign] = useState("");
+  
+  // State for API data
+  const [creators, setCreators] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch recommendations from API
+  useEffect(() => {
+    fetchRecommendations();
+  }, []);
+
+  const fetchRecommendations = async () => {
+    try {
+      setLoading(true);
+      const token = Cookie.get("AdminToken");
+      
+      const response = await axios.get(
+        `${config.BACKEND_URL}/admin/recommendations/list`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        setCreators(response.data.data.creators || []);
+        setBrands(response.data.data.brands || []);
+        setCampaigns(response.data.data.campaigns || []);
+      } else {
+        toast.error(response.data.message || "Failed to fetch recommendations");
+      }
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      toast.error("Failed to load recommendations data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtered creators
   const filteredCreators = creators?.filter((c) => 
