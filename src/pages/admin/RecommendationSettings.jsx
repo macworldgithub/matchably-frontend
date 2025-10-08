@@ -1,34 +1,56 @@
 import React, { useState } from "react";
 
 const initialWeights = {
-  brandKeyword: 15,
-  category: 10,
-  contentScore: 5,
-  uploadRate: 10,
-  approvalRate: 10,
-  satisfaction: 10,
-  activity30Days: 5,
-  ctaPresence: 2,
-  newFactor: 0
+  BrandKeywordMatch: 15,
+  CategoryMatch: 10,
+  ContentScore: 5,
+  UploadRate: 10,
+  ApprovalRate: 10,
+  Satisfaction: 10,
+  ActivityinLast30Days: 5,
+  CTAPresence: 2,
+  NewAdjustmentFactor: 0,
 };
 
 const RecommendationSettings = () => {
   const [weights, setWeights] = useState(initialWeights);
 
   const handleSliderChange = (key, value) => {
-    setWeights(prev => ({ ...prev, [key]: value }));
+    setWeights((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
     <div className="flex flex-col gap-6">
+      <div>
+        {/* Page Header */}
+        <h2 className="text-2xl font-bold mb-4">Recommendation Settings</h2>
 
-      {/* Page Header */}
-      <h2 className="text-2xl font-bold mb-4">Recommendation Settings</h2>
+        {/* Description */}
+        <p className="text-gray-300 mb-4">
+          Adjust the weight of each factor in the AI recommendation score and
+          manage change history
+        </p>
+
+        <div className="w-full mb-6">
+          <div className="bg-[#0f0f10] border border-gray-800 rounded-lg px-6 py-3 text-sm text-gray-300 shadow-sm">
+            <div className="flex justify-between items-center">
+              <div className="text-gray-300 ">Current score version</div>
+              <div className="text-gray-300 ">
+                Last update:{" "}
+                <span className="font-medium ">2025-08-10 14:32</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Sliders */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Object.keys(weights).map((key) => (
-          <div key={key} className="flex flex-col gap-2 bg-[#1f1f1f] p-4 rounded-lg shadow">
+          <div
+            key={key}
+            className="flex flex-col gap-2 bg-[#1f1f1f] p-4 rounded-lg shadow"
+          >
             <div className="flex justify-between text-gray-400 text-sm">
               <span>{key}</span>
               <span>{weights[key]}</span>
@@ -51,8 +73,12 @@ const RecommendationSettings = () => {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mt-4">
-        <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white">Reset to Default</button>
-        <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-white">Save & Apply</button>
+        <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white">
+          Reset to Default
+        </button>
+        <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-white">
+          Save & Apply
+        </button>
       </div>
 
       {/* Change History Table */}
@@ -66,12 +92,12 @@ const RecommendationSettings = () => {
                 <th className="px-4 py-2">Changed By</th>
                 <th className="px-4 py-2">Version</th>
                 <th className="px-4 py-2">Modified Factors</th>
-                <th className="px-4 py-2">Actions</th>
+                <th className="px-4 py-2">Rollback Button</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-t border-gray-700 hover:bg-[#2a2a2a]">
-             <td>no data   </td>
+                <td>no data </td>
               </tr>
             </tbody>
           </table>

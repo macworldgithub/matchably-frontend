@@ -379,11 +379,11 @@ function SidebarLink({ to, icon, label }) {
 
 function AuthChecker({ children, isLogin }) {
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     // Only redirect if no token exists at all
     const token = Cookie.get("token") || localStorage.getItem("token");
-    
+
     if (!token) {
       navigate("/signin");
     }
@@ -405,7 +405,7 @@ function AdminAuthChecker({ children }) {
     async function verifyLogin() {
       try {
         const token = Cookie.get("AdminToken");
-        const res = await axios.get(`${URL}/api/admin/verify`, {
+        const res = await axios.get(`${URL}/admin/verify`, {
           headers: { authorization: token },
         });
         if (res.data.status === "success") return setLoading(false);
