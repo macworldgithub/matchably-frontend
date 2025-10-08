@@ -379,11 +379,11 @@ function SidebarLink({ to, icon, label }) {
 
 function AuthChecker({ children, isLogin }) {
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     // Only redirect if no token exists at all
     const token = Cookie.get("token") || localStorage.getItem("token");
-    
+
     if (!token) {
       navigate("/signin");
     }

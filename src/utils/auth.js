@@ -12,6 +12,7 @@ export async function SignInFunction(user) {
     });
     // Set token in cookies
     Cookies.set("token", res.data.token);
+    clg("web token", token);
     return res.data;
   } catch {
     return {
@@ -30,6 +31,7 @@ export async function SignUpFunction(user) {
     });
     // Set token in cookies
     Cookies.set("token", res.data.token);
+    clg("sign up token", token);
     return res.data;
   } catch (error) {
     console.log(error);
