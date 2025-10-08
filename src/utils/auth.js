@@ -42,7 +42,7 @@ export async function SignUpFunction(user) {
 
 export async function AuthAdminLoginFunction(admin) {
   try {
-    const res = await axios.post(`${API_URL}/api/admin/auth`, {
+    const res = await axios.post(`${API_URL}/admin/auth`, {
       username: admin.username,
       password: admin.password,
     });
