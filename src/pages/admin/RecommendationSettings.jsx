@@ -143,11 +143,57 @@ const RecommendationSettings = () => {
           setLastSavedWeights(weights);
         }
       } else {
-        toast.error(res.data?.message || "Failed to save settings");
+        toast.error(res.data?.message || "Total weight cannot exceed 100");
       }
     } catch (err) {
       console.error("Error saving settings:", err);
-      toast.error("Failed to save settings");
+      toast.error("Total weight cannot exceed 100");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRollback = async (versionId) => {
+    if (!versionId) return;
+
+    try {
+      setSaving(true);
+      const token = Cookie.get("AdminToken");
+      const res = await axios.post(
+        `${config.BACKEND_URL}/admin/recommendations/settings/rollback/${versionId}`,
+        { adminId: "68e619f740042456e84c9c75" },
+        { headers: { Authorization: token } }
+      );
+
+      if (res.data?.status === "success") {
+        const data = res.data?.data;
+        if (data) {
+          const mapped = mapWeightsFromApi(data.weights);
+          setWeights(mapped);
+          setLastSavedWeights(mapped);
+          setLastUpdated(data.updatedAt || data.createdAt || null);
+          setCurrentVersion(data.version || null);
+
+          // Refresh the history after rollback
+          const historyRes = await axios.get(
+            `${config.BACKEND_URL}/admin/recommendations/settings`,
+            { headers: { Authorization: token } }
+          );
+
+          if (historyRes.data?.status === "success") {
+            setHistory(historyRes.data.data || []);
+          }
+
+          toast.success(`Successfully rolled back to version ${data.version}`);
+        } else {
+          toast.error("No data returned after rollback");
+        }
+      } else {
+        toast.error(res.data?.message || "Failed to rollback settings");
+      }
+    } catch (err) {
+      console.error("Error rolling back settings:", err);
+      toast.error("Failed to rollback settings");
     } finally {
       setSaving(false);
     }
@@ -302,8 +348,14 @@ const RecommendationSettings = () => {
                       {h.changeDescription || "—"}
                     </td>
                     <td className="px-4 py-2">
-                      <button className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm">
-                        Rollback
+                      <button
+                        onClick={() => handleRollback(h._id)}
+                        className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm disabled:opacity-50"
+                        disabled={saving}
+                      >
+                        {saving && currentVersion === h.version
+                          ? "Rolling back..."
+                          : "Rollback"}
                       </button>
                     </td>
                   </tr>
