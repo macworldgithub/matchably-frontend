@@ -169,7 +169,7 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
   const [loading, setLoading] = useState(true);
   // Track expanded rows for "Why Recommended" text
   const [expanded, setExpanded] = useState({});
-  
+
   // Modal state for recommendation details
   const [showModal, setShowModal] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
@@ -184,8 +184,8 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
     try {
       setLoading(true);
       const token = Cookie.get("AdminToken");
-      console.log(token)
-      
+      console.log(token);
+
       const response = await axios.get(
         `${config.BACKEND_URL}/admin/recommendations/list`,
         {
@@ -198,12 +198,16 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       if (response.data.status === "success") {
         // Map the API response to match the expected format
         const recommendations = response.data.data || [];
-        
+
         // Transform recommendations to creator format
         const transformedCreators = recommendations.map((rec) => ({
           id: rec._id,
-          username: rec.creator?.name || rec.creator?.username || "Unknown Creator",
-          avatar: rec.creator?.profilePicture || rec.creator?.avatar || "https://via.placeholder.com/40",
+          username:
+            rec.creator?.name || rec.creator?.username || "Unknown Creator",
+          avatar:
+            rec.creator?.profilePicture ||
+            rec.creator?.avatar ||
+            "https://via.placeholder.com/40",
           platform: rec.platform,
           score: rec.score,
           reason: rec.whyRecommended?.join(", ") || "No reason provided",
@@ -214,28 +218,36 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
           invitationStatus: rec.invitationStatus,
           scoreBreakdown: rec.scoreBreakdown,
         }));
-        
+
         setCreators(transformedCreators);
-        
+
         // Extract unique brands and campaigns (if available)
         const uniqueBrands = [];
         const uniqueCampaigns = [];
-        
+
         recommendations.forEach((rec) => {
-          if (rec.brand && typeof rec.brand === 'object') {
-            const exists = uniqueBrands.find(b => b.id === rec.brand._id);
+          if (rec.brand && typeof rec.brand === "object") {
+            const exists = uniqueBrands.find((b) => b.id === rec.brand._id);
             if (!exists) {
-              uniqueBrands.push({ id: rec.brand._id, name: rec.brand.name || rec.brand.brandName });
+              uniqueBrands.push({
+                id: rec.brand._id,
+                name: rec.brand.name || rec.brand.brandName,
+              });
             }
           }
-          if (rec.campaign && typeof rec.campaign === 'object') {
-            const exists = uniqueCampaigns.find(c => c.id === rec.campaign._id);
+          if (rec.campaign && typeof rec.campaign === "object") {
+            const exists = uniqueCampaigns.find(
+              (c) => c.id === rec.campaign._id
+            );
             if (!exists) {
-              uniqueCampaigns.push({ id: rec.campaign._id, name: rec.campaign.title || rec.campaign.campaignTitle });
+              uniqueCampaigns.push({
+                id: rec.campaign._id,
+                name: rec.campaign.title || rec.campaign.campaignTitle,
+              });
             }
           }
         });
-        
+
         setBrands(uniqueBrands);
         setCampaigns(uniqueCampaigns);
       } else {
@@ -254,7 +266,7 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
     try {
       setLoadingDetails(true);
       const token = Cookie.get("AdminToken");
-      
+
       const response = await axios.get(
         `${config.BACKEND_URL}/admin/recommendations/details/${id}`,
         {
@@ -268,7 +280,9 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
         setSelectedRecommendation(response.data.data);
         setShowModal(true);
       } else {
-        toast.error(response.data.message || "Failed to fetch recommendation details");
+        toast.error(
+          response.data.message || "Failed to fetch recommendation details"
+        );
       }
     } catch (error) {
       console.error("Error fetching recommendation details:", error);
@@ -287,14 +301,18 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
   // Recalculate score for specific recommendation
   const handleRecalculate = async (id, event) => {
     event.stopPropagation();
-    
-    if (!window.confirm("Are you sure you want to recalculate the score for this recommendation?")) {
+
+    if (
+      !window.confirm(
+        "Are you sure you want to recalculate the score for this recommendation?"
+      )
+    ) {
       return;
     }
 
     try {
       const token = Cookie.get("AdminToken");
-      
+
       const response = await axios.post(
         `${config.BACKEND_URL}/admin/recommendations/recalculate/${id}`,
         {},
@@ -314,18 +332,20 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       }
     } catch (error) {
       console.error("Error recalculating score:", error);
-      const errorMessage = error.response?.data?.message || "Failed to recalculate score";
+      const errorMessage =
+        error.response?.data?.message || "Failed to recalculate score";
       toast.error(errorMessage);
     }
   };
 
   // Exclude creator from recommendations
   const handleExclude = async (id, event) => {
-    event.stopPropagation(); 
-    
- 
-    const reason = window.prompt("Please provide a reason for excluding this creator:");
-    
+    event.stopPropagation();
+
+    const reason = window.prompt(
+      "Please provide a reason for excluding this creator:"
+    );
+
     if (!reason) {
       toast.info("Exclusion cancelled - reason is required");
       return;
@@ -333,15 +353,14 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
 
     try {
       const token = Cookie.get("AdminToken");
-      
-      
+
       const adminId = "68e619f740042456e84c9c75";
-      
+
       const response = await axios.post(
         `${config.BACKEND_URL}/admin/recommendations/exclude/${id}`,
         {
           adminId: adminId,
-          reason: reason
+          reason: reason,
         },
         {
           headers: {
@@ -359,7 +378,8 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       }
     } catch (error) {
       console.error("Error excluding creator:", error);
-      const errorMessage = error.response?.data?.message || "Failed to exclude creator";
+      const errorMessage =
+        error.response?.data?.message || "Failed to exclude creator";
       toast.error(errorMessage);
     }
   };
@@ -466,20 +486,27 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
           </thead>
           <tbody>
             {filteredCreators && filteredCreators.length > 0 ? (
-              filteredCreators.map(c => (
-                <tr 
-                  key={c.id} 
+              filteredCreators.map((c) => (
+                <tr
+                  key={c.id}
                   className="border-t border-gray-700 hover:bg-[#2a2a2a] cursor-pointer"
                   onClick={() => fetchRecommendationDetails(c.id)}
                 >
                   <td className="px-4 py-2 flex items-center gap-2">
-                    <img src={c.avatar} alt={c.username} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={c.avatar}
+                      alt={c.username}
+                      className="w-6 h-6 rounded-full"
+                    />
                     {c.username}
                   </td>
                   <td className="px-4 py-2">{c.platform}</td>
                   <td className="px-4 py-2">
                     <div className="w-full bg-gray-800 rounded h-2 mt-1">
-                      <div className="bg-blue-500 h-2 rounded" style={{ width: `${c.score}%` }}></div>
+                      <div
+                        className="bg-blue-500 h-2 rounded"
+                        style={{ width: `${c.score}%` }}
+                      ></div>
                     </div>
                     <span className="text-sm mt-1 block">{c.score}%</span>
                   </td>
@@ -492,27 +519,48 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                       if (isExpanded) {
                         return (
                           <span>
-                            {text} <button className="text-blue-500 underline ml-1" onClick={() => setExpanded(prev => ({ ...prev, [c.id]: false }))}>View Less</button>
+                            {text}{" "}
+                            <button
+                              className="text-blue-500 underline ml-1"
+                              onClick={() =>
+                                setExpanded((prev) => ({
+                                  ...prev,
+                                  [c.id]: false,
+                                }))
+                              }
+                            >
+                              View Less
+                            </button>
                           </span>
                         );
                       }
                       return (
                         <span>
-                          {text.slice(0, limit)}... <button className="text-blue-500 underline ml-1" onClick={() => setExpanded(prev => ({ ...prev, [c.id]: true }))}>View More</button>
+                          {text.slice(0, limit)}...{" "}
+                          <button
+                            className="text-blue-500 underline ml-1"
+                            onClick={() =>
+                              setExpanded((prev) => ({ ...prev, [c.id]: true }))
+                            }
+                          >
+                            View More
+                          </button>
                         </span>
                       );
                     })()}
                   </td>
-                  <td className="px-4 py-2">{c.invites}/{c.accepted}</td>
+                  <td className="px-4 py-2">
+                    {c.invites}/{c.accepted}
+                  </td>
                   <td className="px-4 py-2 flex gap-2">
-                    <button 
-                      className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm" 
+                    <button
+                      className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm"
                       onClick={(e) => handleRecalculate(c.id, e)}
                     >
                       Recalculate
                     </button>
-                    <button 
-                      className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-sm text-white" 
+                    <button
+                      className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-sm text-white"
                       onClick={(e) => handleExclude(c.id, e)}
                     >
                       Exclude
@@ -525,7 +573,9 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                 <td colSpan="6" className="px-4 py-8 text-center text-gray-400">
                   <div className="flex flex-col items-center gap-2">
                     <p className="text-lg">No recommendations found</p>
-                    <p className="text-sm">Try adjusting your filters or check back later</p>
+                    <p className="text-sm">
+                      Try adjusting your filters or check back later
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -536,8 +586,14 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
 
       {/* Recommendation Details Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeModal}>
-          <div className="bg-[#1f1f1f] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-[#1f1f1f] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {loadingDetails ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
@@ -546,28 +602,45 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
               <>
                 {/* Modal Header */}
                 <div className="flex items-center justify-between mb-6 border-b border-gray-700 pb-4">
-                  <h2 className="text-2xl font-bold text-white">Recommendation Details</h2>
-                  <button onClick={closeModal} className="text-gray-400 hover:text-white text-2xl">
+                  <h2 className="text-2xl font-bold text-white">
+                    Recommendation Details
+                  </h2>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-white text-2xl"
+                  >
                     ×
                   </button>
                 </div>
 
                 {/* Creator Info */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Creator Information</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    Creator Information
+                  </h3>
                   <div className="bg-[#141414] rounded-lg p-4 flex items-center gap-4">
-                    <img 
-                      src={selectedRecommendation.creator?.profilePicture || selectedRecommendation.creator?.avatar || "https://via.placeholder.com/80"} 
-                      alt={selectedRecommendation.creator?.name || "Creator"} 
+                    <img
+                      src={
+                        selectedRecommendation.creator?.profilePicture ||
+                        selectedRecommendation.creator?.avatar ||
+                        "https://via.placeholder.com/80"
+                      }
+                      alt={selectedRecommendation.creator?.name || "Creator"}
                       className="w-16 h-16 rounded-full"
                     />
                     <div>
                       <p className="text-white font-medium text-lg">
-                        {selectedRecommendation.creator?.name || selectedRecommendation.creator?.username || "Unknown Creator"}
+                        {selectedRecommendation.creator?.name ||
+                          selectedRecommendation.creator?.username ||
+                          "Unknown Creator"}
                       </p>
-                      <p className="text-gray-400 text-sm">{selectedRecommendation.platform}</p>
+                      <p className="text-gray-400 text-sm">
+                        {selectedRecommendation.platform}
+                      </p>
                       {selectedRecommendation.creator?.email && (
-                        <p className="text-gray-400 text-sm">{selectedRecommendation.creator.email}</p>
+                        <p className="text-gray-400 text-sm">
+                          {selectedRecommendation.creator.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -575,24 +648,42 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
 
                 {/* Score Information */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Match Score</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    Match Score
+                  </h3>
                   <div className="bg-[#141414] rounded-lg p-4">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="flex-1">
                         <div className="w-full bg-gray-800 rounded h-4">
-                          <div className="bg-blue-500 h-4 rounded" style={{ width: `${selectedRecommendation.score}%` }}></div>
+                          <div
+                            className="bg-blue-500 h-4 rounded"
+                            style={{
+                              width: `${selectedRecommendation.score}%`,
+                            }}
+                          ></div>
                         </div>
                       </div>
-                      <span className="text-white font-bold text-xl">{selectedRecommendation.score}%</span>
+                      <span className="text-white font-bold text-xl">
+                        {selectedRecommendation.score}%
+                      </span>
                     </div>
-                    
+
                     {/* Score Breakdown */}
                     {selectedRecommendation.scoreBreakdown && (
                       <div className="grid grid-cols-2 gap-3 mt-4">
-                        {Object.entries(selectedRecommendation.scoreBreakdown).map(([key, value]) => (
-                          <div key={key} className="flex justify-between text-sm">
-                            <span className="text-gray-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                            <span className="text-white font-medium">{value}</span>
+                        {Object.entries(
+                          selectedRecommendation.scoreBreakdown
+                        ).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className="flex justify-between text-sm"
+                          >
+                            <span className="text-gray-400 capitalize">
+                              {key.replace(/([A-Z])/g, " $1").trim()}:
+                            </span>
+                            <span className="text-white font-medium">
+                              {value}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -602,12 +693,18 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
 
                 {/* Why Recommended */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Why Recommended</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    Why Recommended
+                  </h3>
                   <div className="bg-[#141414] rounded-lg p-4">
                     <ul className="list-disc list-inside space-y-2">
-                      {selectedRecommendation.whyRecommended?.map((reason, index) => (
-                        <li key={index} className="text-gray-300">{reason}</li>
-                      ))}
+                      {selectedRecommendation.whyRecommended?.map(
+                        (reason, index) => (
+                          <li key={index} className="text-gray-300">
+                            {reason}
+                          </li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -616,20 +713,28 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {selectedRecommendation.campaign && (
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-3">Campaign</h3>
+                      <h3 className="text-lg font-semibold text-white mb-3">
+                        Campaign
+                      </h3>
                       <div className="bg-[#141414] rounded-lg p-4">
                         <p className="text-white font-medium">
-                          {selectedRecommendation.campaign.title || selectedRecommendation.campaign.campaignTitle || "N/A"}
+                          {selectedRecommendation.campaign.title ||
+                            selectedRecommendation.campaign.campaignTitle ||
+                            "N/A"}
                         </p>
                       </div>
                     </div>
                   )}
                   {selectedRecommendation.brand && (
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-3">Brand</h3>
+                      <h3 className="text-lg font-semibold text-white mb-3">
+                        Brand
+                      </h3>
                       <div className="bg-[#141414] rounded-lg p-4">
                         <p className="text-white font-medium">
-                          {selectedRecommendation.brand.name || selectedRecommendation.brand.brandName || "N/A"}
+                          {selectedRecommendation.brand.name ||
+                            selectedRecommendation.brand.brandName ||
+                            "N/A"}
                         </p>
                       </div>
                     </div>
@@ -638,25 +743,42 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
 
                 {/* Invitation Status */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Invitation Status</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    Invitation Status
+                  </h3>
                   <div className="bg-[#141414] rounded-lg p-4 grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-gray-400 text-sm">Status</p>
-                      <p className={`font-medium capitalize ${
-                        selectedRecommendation.invitationStatus === 'accepted' ? 'text-green-500' :
-                        selectedRecommendation.invitationStatus === 'pending' ? 'text-yellow-500' :
-                        'text-gray-300'
-                      }`}>
-                        {selectedRecommendation.invitationStatus?.replace('_', ' ') || 'Not Invited'}
+                      <p
+                        className={`font-medium capitalize ${
+                          selectedRecommendation.invitationStatus === "accepted"
+                            ? "text-green-500"
+                            : selectedRecommendation.invitationStatus ===
+                              "pending"
+                            ? "text-yellow-500"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        {selectedRecommendation.invitationStatus?.replace(
+                          "_",
+                          " "
+                        ) || "Not Invited"}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-400 text-sm">Invitations Sent</p>
-                      <p className="text-white font-medium">{selectedRecommendation.invitationCount || 0}</p>
+                      <p className="text-white font-medium">
+                        {selectedRecommendation.invitationCount || 0}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-400 text-sm">Acceptance Rate</p>
-                      <p className="text-white font-medium">{Math.round(selectedRecommendation.acceptanceRate * 100) || 0}%</p>
+                      <p className="text-white font-medium">
+                        {Math.round(
+                          selectedRecommendation.acceptanceRate * 100
+                        ) || 0}
+                        %
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -665,16 +787,26 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-gray-400 text-sm">Created At</p>
-                    <p className="text-white">{new Date(selectedRecommendation.createdAt).toLocaleString()}</p>
+                    <p className="text-white">
+                      {new Date(
+                        selectedRecommendation.createdAt
+                      ).toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Updated At</p>
-                    <p className="text-white">{new Date(selectedRecommendation.updatedAt).toLocaleString()}</p>
+                    <p className="text-white">
+                      {new Date(
+                        selectedRecommendation.updatedAt
+                      ).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </>
             ) : (
-              <p className="text-gray-400 text-center py-8">No data available</p>
+              <p className="text-gray-400 text-center py-8">
+                No data available
+              </p>
             )}
           </div>
         </div>
