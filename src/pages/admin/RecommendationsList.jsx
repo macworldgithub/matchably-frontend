@@ -400,12 +400,12 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                     {c.invites}/{c.accepted}
                   </td>
                   <td className="px-4 py-2 flex gap-2">
-                    <button
+                    {/* <button
                       className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm"
                       onClick={(e) => openConfirmModal(c.id, e)}
                     >
                       Recalculate
-                    </button>
+                    </button> */}
 
                     <button
                       className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-sm text-white"
