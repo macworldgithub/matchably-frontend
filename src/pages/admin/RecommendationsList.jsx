@@ -1,154 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import config from "../../config";
-// import Cookie from "js-cookie";
-// import { toast } from "react-toastify";
-
-// // Props: creators, brands, campaigns fetched from API
-// const RecommendationsList = ({ onRecalculate, onExclude }) => {
-//   const [platformFilter, setPlatformFilter] = useState("All");
-//   const [scoreRange, setScoreRange] = useState([0, 100]);
-//   const [brand, setBrand] = useState("");
-//   const [campaign, setCampaign] = useState("");
-
-//   // State for API data
-//   const [creators, setCreators] = useState([]);
-//   const [brands, setBrands] = useState([]);
-//   const [campaigns, setCampaigns] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   // Fetch recommendations from API
-//   useEffect(() => {
-//     fetchRecommendations();
-//   }, []);
-
-//   const fetchRecommendations = async () => {
-//     try {
-//       setLoading(true);
-//       const token = Cookie.get("AdminToken");
-
-//       const response = await axios.get(
-//         `${config.BACKEND_URL}/admin/recommendations/list`,
-//         {
-//           headers: {
-//             Authorization: token,
-//           },
-//         }
-//       );
-
-//       if (response.data.status === "success") {
-//         setCreators(response.data.data.creators || []);
-//         setBrands(response.data.data.brands || []);
-//         setCampaigns(response.data.data.campaigns || []);
-//       } else {
-//         toast.error(response.data.message || "Failed to fetch recommendations");
-//       }
-//     } catch (error) {
-//       console.error("Error fetching recommendations:", error);
-//       toast.error("Failed to load recommendations data");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Filtered creators
-//   const filteredCreators = creators?.filter((c) =>
-//     (platformFilter === "All" || c.platform === platformFilter) &&
-//     c.score >= scoreRange[0] &&
-//     c.score <= scoreRange[1] &&
-//     (brand ? c.brandId === brand : true) &&
-//     (campaign ? c.campaignId === campaign : true)
-//   );
-
-//   return (
-//     <div className="flex flex-col gap-6">
-
-//       {/* Filters */}
-//       <div className="flex flex-wrap gap-4 items-center bg-[#1f1f1f] p-4 rounded-lg">
-//         <input
-//           type="range"
-//           min="0" max="100"
-//           value={scoreRange[1]}
-//           onChange={(e) => setScoreRange([scoreRange[0], Number(e.target.value)])}
-//           className="w-40 accent-blue-500"
-//         />
-//         <select
-//           className="bg-[#141414] border border-gray-700 rounded px-2 py-1 text-white"
-//           value={brand}
-//           onChange={(e) => setBrand(e.target.value)}
-//         >
-//           <option value="">All Brands</option>
-//           {brands && brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-//         </select>
-//         <select
-//           className="bg-[#141414] border border-gray-700 rounded px-2 py-1 text-white"
-//           value={campaign}
-//           onChange={(e) => setCampaign(e.target.value)}
-//         >
-//           <option value="">All Campaigns</option>
-//           {campaigns && campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-//         </select>
-//         <select
-//           className="bg-[#141414] border border-gray-700 rounded px-2 py-1 text-white"
-//           value={platformFilter}
-//           onChange={(e) => setPlatformFilter(e.target.value)}
-//         >
-//           <option>All</option>
-//           <option>TikTok</option>
-//           <option>Instagram</option>
-//         </select>
-//         <button className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-white" onClick={() => {setBrand(""); setCampaign(""); setPlatformFilter("All"); setScoreRange([0,100]);}}>Reset</button>
-//         <button className="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-white">Apply</button>
-//       </div>
-
-//       {/* Table */}
-//       <div className="overflow-auto rounded-lg border border-gray-700">
-//         <table className="w-full text-left text-gray-300">
-//           <thead className="bg-[#1f1f1f] text-gray-400">
-//             <tr>
-//               <th className="px-4 py-2">Creator</th>
-//               <th className="px-4 py-2">Platform</th>
-//               <th className="px-4 py-2">Score</th>
-//               <th className="px-4 py-2">Why Recommended</th>
-//               <th className="px-4 py-2">Invites/Acceptance</th>
-//               <th className="px-4 py-2">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filteredCreators && filteredCreators?.map(c => (
-//               <tr key={c.id} className="border-t border-gray-700 hover:bg-[#2a2a2a]">
-//                 <td className="px-4 py-2 flex items-center gap-2">
-//                   <img src={c.avatar} alt={c.username} className="w-6 h-6 rounded-full" />
-//                   {c.username}
-//                 </td>
-//                 <td className="px-4 py-2">{c.platform}</td>
-//                 <td className="px-4 py-2">
-//                   <div className="w-full bg-gray-800 rounded h-2 mt-1">
-//                     <div className="bg-blue-500 h-2 rounded" style={{ width: `${c.score}%` }}></div>
-//                   </div>
-//                   <span className="text-sm mt-1 block">{c.score}</span>
-//                 </td>
-//                 <td className="px-4 py-2">
-//                   {c.reason.length > 50 ? (
-//                     <span>{c.reason.slice(0,50)}... <button className="text-blue-500 underline">View More</button></span>
-//                   ) : c.reason}
-//                 </td>
-//                 <td className="px-4 py-2">{c.invites}/{c.accepted}</td>
-//                 <td className="px-4 py-2 flex gap-2">
-//                   <button className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm" onClick={()=>onRecalculate(c.id)}>Recalculate</button>
-//                   <button className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-sm text-white" onClick={()=>onExclude(c.id)}>Exclude</button>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default RecommendationsList;
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../../config";
@@ -174,6 +23,13 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  //  New modal states
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmActionId, setConfirmActionId] = useState(null);
+  const [showExcludeModal, setShowExcludeModal] = useState(false);
+  const [excludeReason, setExcludeReason] = useState("");
+  const [excludeId, setExcludeId] = useState(null);
 
   // Fetch recommendations from API
   useEffect(() => {
@@ -298,89 +154,68 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
     setSelectedRecommendation(null);
   };
 
-  // Recalculate score for specific recommendation
-  const handleRecalculate = async (id, event) => {
-    event.stopPropagation();
+  const openConfirmModal = (id, e) => {
+    e.stopPropagation();
+    setConfirmActionId(id);
+    setShowConfirmModal(true);
+  };
 
-    if (
-      !window.confirm(
-        "Are you sure you want to recalculate the score for this recommendation?"
-      )
-    ) {
-      return;
-    }
-
+  const confirmRecalculate = async () => {
+    setShowConfirmModal(false);
     try {
       const token = Cookie.get("AdminToken");
-
       const response = await axios.post(
-        `${config.BACKEND_URL}/admin/recommendations/recalculate/${id}`,
+        `${config.BACKEND_URL}/admin/recommendations/recalculate/${confirmActionId}`,
         {},
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
+        { headers: { Authorization: token } }
       );
-
       if (response.data.status === "success") {
         toast.success("Score recalculated successfully!");
-        // Refresh the recommendations list
         fetchRecommendations();
       } else {
-        toast.error(response.data.message || "Failed to recalculate score");
+        toast.error("Failed to recalculate score");
       }
     } catch (error) {
-      console.error("Error recalculating score:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to recalculate score";
-      toast.error(errorMessage);
+      toast.error("Error recalculating score");
+    } finally {
+      setConfirmActionId(null);
     }
   };
 
-  // Exclude creator from recommendations
-  const handleExclude = async (id, event) => {
-    event.stopPropagation();
+  // open exclusion modal instead of window.prompt
+  const openExcludeModal = (id, e) => {
+    e.stopPropagation();
+    setExcludeId(id);
+    setExcludeReason("");
+    setShowExcludeModal(true);
+  };
 
-    const reason = window.prompt(
-      "Please provide a reason for excluding this creator:"
-    );
-
-    if (!reason) {
-      toast.info("Exclusion cancelled - reason is required");
+  const confirmExclude = async () => {
+    if (!excludeReason.trim()) {
+      toast.info("Reason is required to exclude a creator");
       return;
     }
 
     try {
       const token = Cookie.get("AdminToken");
-
-      const adminId = "68e619f740042456e84c9c75";
-
+      const adminId = "68e619f740042456e84c9c75"; // your admin ID
       const response = await axios.post(
-        `${config.BACKEND_URL}/admin/recommendations/exclude/${id}`,
-        {
-          adminId: adminId,
-          reason: reason,
-        },
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
+        `${config.BACKEND_URL}/admin/recommendations/exclude/${excludeId}`,
+        { adminId, reason: excludeReason },
+        { headers: { Authorization: token } }
       );
-
       if (response.data.status === "success") {
         toast.success("Creator excluded successfully!");
-        // Refresh the recommendations list
         fetchRecommendations();
       } else {
         toast.error(response.data.message || "Failed to exclude creator");
       }
     } catch (error) {
-      console.error("Error excluding creator:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to exclude creator";
-      toast.error(errorMessage);
+      toast.error("Error excluding creator");
+    } finally {
+      setShowExcludeModal(false);
+      setExcludeId(null);
+      setExcludeReason("");
     }
   };
 
@@ -393,6 +228,18 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       (brand ? c.brandId === brand : true) &&
       (campaign ? c.campaignId === campaign : true)
   );
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading recommendations...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state
   if (loading) {
@@ -493,11 +340,11 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                   onClick={() => fetchRecommendationDetails(c.id)}
                 >
                   <td className="px-4 py-2 flex items-center gap-2">
-                    <img
+                    {/* <img
                       src={c.avatar}
                       alt={c.username}
                       className="w-6 h-6 rounded-full"
-                    />
+                    /> */}
                     {c.username}
                   </td>
                   <td className="px-4 py-2">{c.platform}</td>
@@ -553,15 +400,16 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                     {c.invites}/{c.accepted}
                   </td>
                   <td className="px-4 py-2 flex gap-2">
-                    <button
+                    {/* <button
                       className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm"
-                      onClick={(e) => handleRecalculate(c.id, e)}
+                      onClick={(e) => openConfirmModal(c.id, e)}
                     >
                       Recalculate
-                    </button>
+                    </button> */}
+
                     <button
                       className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-sm text-white"
-                      onClick={(e) => handleExclude(c.id, e)}
+                      onClick={(e) => openExcludeModal(c.id, e)}
                     >
                       Exclude
                     </button>
@@ -808,6 +656,68 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                 No data available
               </p>
             )}
+          </div>
+        </div>
+      )}
+      {/* Confirm Recalculate Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-[#1f1f1f] p-6 rounded-lg shadow-lg w-[400px]">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Confirm Recalculation
+            </h2>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to recalculate this recommendation's score?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white"
+                onClick={confirmRecalculate}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Exclude Modal */}
+      {showExcludeModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-[#1f1f1f] p-6 rounded-lg shadow-lg w-[450px]">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Exclude Creator
+            </h2>
+            <p className="text-gray-300 mb-3">
+              Please provide a reason for excluding this creator:
+            </p>
+            <textarea
+              className="w-full p-2 rounded bg-[#141414] text-white border border-gray-600 mb-4"
+              rows="3"
+              value={excludeReason}
+              onChange={(e) => setExcludeReason(e.target.value)}
+              placeholder="Enter reason here..."
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+                onClick={() => setShowExcludeModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-white"
+                onClick={confirmExclude}
+              >
+                Exclude
+              </button>
+            </div>
           </div>
         </div>
       )}
