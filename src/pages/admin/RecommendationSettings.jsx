@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import axios from "axios";
+import config from "../../config";
+import Cookie from "js-cookie";
+import { toast } from "react-toastify";
 
 const initialWeights = {
   BrandKeywordMatch: 15,
@@ -14,9 +18,180 @@ const initialWeights = {
 
 const RecommendationSettings = () => {
   const [weights, setWeights] = useState(initialWeights);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [lastSavedWeights, setLastSavedWeights] = useState(initialWeights);
+
+  // Detect if current weights differ from last saved
+  const isDirty = React.useMemo(() => {
+    const keys = Object.keys(initialWeights);
+    return keys.some(
+      (k) => Number(weights[k] ?? 0) !== Number(lastSavedWeights[k] ?? 0)
+    );
+  }, [weights, lastSavedWeights]);
+
+  // Map between API keys (camelCase) and UI keys (TitleCase)
+  const apiToUiKey = {
+    brandKeywordMatch: "BrandKeywordMatch",
+    categoryMatch: "CategoryMatch",
+    contentScore: "ContentScore",
+    uploadRate: "UploadRate",
+    approvalRate: "ApprovalRate",
+    satisfaction: "Satisfaction",
+    activityLast30Days: "ActivityinLast30Days",
+    ctaPresence: "CTAPresence",
+    newAdjustmentFactor: "NewAdjustmentFactor",
+  };
+  const uiToApiKey = Object.fromEntries(
+    Object.entries(apiToUiKey).map(([k, v]) => [v, k])
+  );
+  const mapWeightsFromApi = (apiWeights = {}) => {
+    const mapped = { ...initialWeights };
+    Object.keys(apiWeights).forEach((k) => {
+      const uiKey = apiToUiKey[k];
+      if (uiKey) mapped[uiKey] = apiWeights[k];
+    });
+    return mapped;
+  };
+  const mapWeightsToApi = (uiWeights = {}) => {
+    const out = {};
+    Object.keys(uiWeights).forEach((k) => {
+      const apiKey = uiToApiKey[k];
+      if (apiKey) out[apiKey] = uiWeights[k];
+    });
+    return out;
+  };
 
   const handleSliderChange = (key, value) => {
     setWeights((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Fetch current settings from API
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const token = Cookie.get("AdminToken");
+        const res = await axios.get(
+          `${config.BACKEND_URL}/admin/recommendations/settings`,
+          {
+            headers: { Authorization: token },
+          }
+        );
+        if (res.data?.status === "success") {
+          const list = Array.isArray(res.data?.data) ? res.data.data : [];
+          setHistory(list);
+          if (list.length > 0) {
+            const latest = list[0];
+            if (latest.weights) {
+              const mapped = mapWeightsFromApi(latest.weights);
+              setWeights(mapped);
+              setLastSavedWeights(mapped);
+            }
+            setLastUpdated(latest.updatedAt || latest.createdAt || null);
+            setCurrentVersion(latest.version || null);
+          }
+        } else {
+          toast.error(res.data?.message || "Failed to fetch settings");
+        }
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+        toast.error("Failed to load settings");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      if (!isDirty) {
+        toast.info("No changes to save");
+        setSaving(false);
+        return;
+      }
+      const token = Cookie.get("AdminToken");
+      const res = await axios.post(
+        `${config.BACKEND_URL}/admin/recommendations/settings`,
+        {
+          adminId: "68e619f740042456e84c9c75",
+          weights: mapWeightsToApi(weights),
+        },
+        { headers: { Authorization: token } }
+      );
+      if (res.data?.status === "success") {
+        toast.success("Settings saved successfully");
+        const data = res.data?.data;
+        if (Array.isArray(data) && data.length > 0) {
+          const latest = data[0];
+          setLastUpdated(
+            latest.updatedAt || latest.createdAt || new Date().toISOString()
+          );
+          setCurrentVersion(latest.version || currentVersion);
+          setHistory(data);
+          setLastSavedWeights(weights);
+        } else if (data && (data.updatedAt || data.createdAt)) {
+          setLastUpdated(data.updatedAt || data.createdAt);
+          setLastSavedWeights(weights);
+        } else {
+          setLastUpdated(new Date().toISOString());
+          setLastSavedWeights(weights);
+        }
+      } else {
+        toast.error(res.data?.message || "Failed to save settings");
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      setSaving(true);
+      const token = Cookie.get("AdminToken");
+      const res = await axios.post(
+        `${config.BACKEND_URL}/admin/recommendations/settings/reset`,
+        { adminId: "68e619f740042456e84c9c75" },
+        { headers: { Authorization: token } }
+      );
+      if (res.data?.status === "success") {
+        const data = res.data?.data;
+        if (Array.isArray(data) && data.length > 0) {
+          const latest = data[0];
+          if (latest.weights) {
+            const mapped = mapWeightsFromApi(latest.weights);
+            setWeights(mapped);
+            setLastSavedWeights(mapped);
+          }
+          setLastUpdated(latest.updatedAt || latest.createdAt || null);
+          setCurrentVersion(latest.version || null);
+          setHistory(data);
+        } else if (data?.weights) {
+          const mapped = mapWeightsFromApi(data.weights);
+          setWeights(mapped);
+          setLastSavedWeights(mapped);
+        } else {
+          setWeights(initialWeights);
+          setLastSavedWeights(initialWeights);
+        }
+        toast.success("Settings reset to defaults");
+      } else {
+        toast.error(res.data?.message || "Failed to reset settings");
+      }
+    } catch (err) {
+      console.error("Error resetting settings:", err);
+      toast.error("Failed to reset settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -37,9 +212,16 @@ const RecommendationSettings = () => {
               <div className="text-gray-300 ">Current score version</div>
               <div className="text-gray-300 ">
                 Last update:{" "}
-                <span className="font-medium ">2025-08-10 14:32</span>
+                <span className="font-medium ">
+                  {lastUpdated ? new Date(lastUpdated).toLocaleString() : "—"}
+                </span>
               </div>
             </div>
+            {currentVersion && (
+              <div className="text-xs text-gray-500 mt-1">
+                Version: {currentVersion}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -62,6 +244,7 @@ const RecommendationSettings = () => {
               value={weights[key]}
               onChange={(e) => handleSliderChange(key, Number(e.target.value))}
               className="w-full h-2 bg-gray-700 rounded-lg accent-blue-500 cursor-pointer"
+              disabled={loading}
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>0</span>
@@ -73,11 +256,19 @@ const RecommendationSettings = () => {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mt-4">
-        <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white">
+        <button
+          className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white disabled:opacity-60"
+          onClick={handleReset}
+          disabled={loading || saving}
+        >
           Reset to Default
         </button>
-        <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-white">
-          Save & Apply
+        <button
+          className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-white disabled:opacity-60"
+          onClick={handleSave}
+          disabled={loading || saving}
+        >
+          {saving ? "Saving..." : "Save & Apply"}
         </button>
       </div>
 
@@ -96,9 +287,34 @@ const RecommendationSettings = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-t border-gray-700 hover:bg-[#2a2a2a]">
-                <td>no data </td>
-              </tr>
+              {history && history.length > 0 ? (
+                history.map((h) => (
+                  <tr
+                    key={h._id}
+                    className="border-t border-gray-700 hover:bg-[#2a2a2a]"
+                  >
+                    <td className="px-4 py-2">
+                      {new Date(h.updatedAt || h.createdAt).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-2">{h.changedBy || "—"}</td>
+                    <td className="px-4 py-2">{h.version || "—"}</td>
+                    <td className="px-4 py-2 text-sm text-gray-400">
+                      {h.changeDescription || "—"}
+                    </td>
+                    <td className="px-4 py-2">
+                      <button className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded text-sm">
+                        Rollback
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="border-t border-gray-700">
+                  <td className="px-4 py-3" colSpan={5}>
+                    no data
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
