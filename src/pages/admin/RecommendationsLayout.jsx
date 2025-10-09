@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
+import axios from "axios";
+import config from "../../config";
+import Cookie from "js-cookie";
+import { toast } from "react-toastify";
 
 const kpiCards = [
   { key: "today", label: "Today's Recommendations" },
@@ -8,7 +12,41 @@ const kpiCards = [
   { key: "acceptanceRate", label: "Acceptance Rate" },
 ];
 
-const RecommendationsLayout = ({ kpiData }) => {
+const RecommendationsLayout = () => {
+  const [kpiData, setKpiData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch KPIs data
+  useEffect(() => {
+    fetchKPIs();
+  }, []);
+
+  const fetchKPIs = async () => {
+    try {
+      setLoading(true);
+      const token = Cookie.get("AdminToken");
+
+      const response = await axios.get(
+        `${config.BACKEND_URL}/admin/recommendations/kpis`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        setKpiData(response.data.data);
+      } else {
+        toast.error(response.data.message || "Failed to fetch KPIs");
+      }
+    } catch (error) {
+      console.error("Error fetching KPIs:", error);
+      toast.error("Failed to load KPIs data");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex flex-col p-6 bg-[#141414] min-h-screen text-white">
       
@@ -22,11 +60,16 @@ const RecommendationsLayout = ({ kpiData }) => {
         {kpiCards.map((card) => (
           <div
             key={card.key}
-            className="p-4 bg-[#1f1f1f] rounded-lg shadow hover:shadow-md cursor-pointer"
-            onClick={() => console.log(`Filter by ${card.key}`)}
+            className="p-4 bg-[#1f1f1f] rounded-lg shadow hover:shadow-md"
           >
             <span className="text-gray-400 text-sm">{card.label}</span>
-            <span className="text-xl font-bold mt-1 block">{kpiData?.[card.key] ?? "-"}</span>
+            {loading ? (
+              <div className="animate-pulse h-8 bg-gray-700 rounded mt-2"></div>
+            ) : (
+              <span className="text-xl font-bold mt-1 block">
+                {kpiData?.[card.key] !== undefined ? kpiData[card.key] : "-"}
+              </span>
+            )}
           </div>
         ))}
       </div>
