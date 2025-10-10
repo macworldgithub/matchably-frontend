@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookie from "js-cookie";
+import { toast } from "react-toastify";
 import config from "../../config";
 
 const ExclusionsWhitelist = () => {
@@ -13,9 +14,11 @@ const ExclusionsWhitelist = () => {
   const [excluded, setExcluded] = useState([]);
   const [whitelisted, setWhitelisted] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pendingAddIds, setPendingAddIds] = useState(new Set());
 
-  // ✅ Fetch data on mount
+const [selectedIds, setSelectedIds] = useState([]);
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,82 +68,137 @@ const ExclusionsWhitelist = () => {
     return matchesSearch && matchesPlatform && matchesReason;
   });
 
-  // ✅ Add Whitelist (aligned with backend)
-  const handleAddWhitelist = async ({
-    creatorMongoId,
-    brandId = null,
-    campaignId = null,
-    tags = [],
-  }) => {
-    try {
-      if (!creatorMongoId || typeof creatorMongoId !== "string") {
-        alert("Invalid creator id");
-        return;
-      }
-      // Prevent multiple concurrent requests for same creator
-      if (pendingAddIds.has(creatorMongoId)) return;
-      setPendingAddIds((prev) => {
-        const next = new Set(prev);
-        next.add(creatorMongoId);
-        return next;
-      });
-
-      // Build payload exactly as backend expects
-      const payload = {
-        creatorId: creatorMongoId,
-        adminId: "68e619f740042456e84c9c75",
-        brandId: "6704d7f517b4b2a46f06f9a9", // ✅ Hardcoded brandId
-        campaignId: "6704d80617b4b2a46f06f9b1", // ✅ Hardcoded campaignId
-        ...(Array.isArray(tags) && tags.length ? { tags } : {}),
-      };
-
-      const token = Cookie.get("AdminToken");
-      const res = await axios.post(
-        `${config.BACKEND_URL}/admin/recommendations/whitelist/add`,
-        payload,
-        {
-          headers: {
-            Authorization: token?.startsWith("Bearer ")
-              ? token
-              : `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (res.data?.status === "success") {
-        const created = {
-          _id: creatorMongoId,
-          creatorId: creatorMongoId,
-          reason: "Whitelisted by admin",
-          createdAt: new Date().toISOString(),
-          platform: "Instagram", // ✅ set platform for display
-          type: "whitelisted",
-        };
-        setWhitelisted((prev) => {
-          const seen = new Set();
-          const normalized = [created, ...prev].filter((item) => {
-            const id = item.creatorId || item._id;
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
-          });
-          return normalized;
-        });
-      } else {
-        alert(res.data?.message || "Failed to add whitelist. Try again.");
-      }
-    } catch (error) {
-      console.error("❌ Error adding whitelist:", error);
-      alert("Failed to add whitelist. Please try again.");
-    } finally {
-      setPendingAddIds((prev) => {
-        const next = new Set(prev);
-        next.delete(creatorMongoId);
-        return next;
-      });
+  const handleDelete = async (id) => {
+    if (!id) {
+      toast.error("❌ Invalid ID");
+      return;
     }
+
+    // ✅ Show custom confirmation toast
+    toast.info(
+      <div className="flex flex-col">
+        <span>Are you sure you want to remove this record?</span>
+        <div className="flex justify-end gap-2 mt-2">
+          <button
+            className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-sm"
+            onClick={async () => {
+              toast.dismiss(); // close confirmation toast
+              try {
+                const token = Cookie.get("AdminToken");
+                const res = await axios.delete(
+                  `${config.BACKEND_URL}/admin/recommendations/exclusions-whitelist/${id}`,
+                  {
+                    headers: {
+                      Authorization: token?.startsWith("Bearer ")
+                        ? token
+                        : `Bearer ${token}`,
+                    },
+                  }
+                );
+
+                if (res.data?.status === "success") {
+                  toast.success(" Successfully removed.");
+
+                  // ✅ Update UI
+                  if (tab === "excluded") {
+                    setExcluded((prev) => prev.filter((item) => item._id !== id));
+                  } else {
+                    setWhitelisted((prev) => prev.filter((item) => item._id !== id));
+                  }
+                } else {
+                  toast.error(res.data?.message || "Failed to remove item.");
+                }
+              } catch (error) {
+                console.error("Error removing item:", error);
+                toast.error("Server error: Failed to remove item.");
+              }
+            }}
+          >
+            Yes
+          </button>
+
+          <button
+            className="bg-gray-500 hover:bg-gray-400 text-white px-3 py-1 rounded text-sm"
+            onClick={() => toast.dismiss()}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>,
+      { autoClose: false, closeOnClick: false }
+    );
   };
 
+const handleBulkRemove = () => {
+  if (selectedIds.length === 0) {
+    toast.info("Please select at least one record to remove.");
+    return;
+  }
+
+  // Show custom confirmation popup using toast
+  toast.info(
+    <div className="flex flex-col">
+      <span>Are you sure you want to remove selected records?</span>
+      <div className="flex justify-end gap-2 mt-2">
+        <button
+          className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-sm"
+          onClick={async () => {
+            toast.dismiss();
+            try {
+              const token = Cookie.get("AdminToken");
+              const res = await axios.post(
+                `${config.BACKEND_URL}/admin/recommendations/exclusions-whitelist/bulk-remove`,
+                { ids: selectedIds },
+                {
+                  headers: {
+                    Authorization: token?.startsWith("Bearer ")
+                      ? token
+                      : `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (res.data?.status === "success") {
+                toast.success("✅ Selected records removed successfully!");
+
+                // Update UI after successful removal
+                if (tab === "excluded") {
+                  setExcluded((prev) =>
+                    prev.filter((item) => !selectedIds.includes(item._id))
+                  );
+                } else {
+                  setWhitelisted((prev) =>
+                    prev.filter((item) => !selectedIds.includes(item._id))
+                  );
+                }
+
+                setSelectedIds([]); // clear selection
+              } else {
+                toast.error(res.data?.message || "Failed to remove records.");
+              }
+            } catch (error) {
+              console.error("Error in bulk remove:", error);
+              toast.error("Server error: Failed to remove records.");
+            }
+          }}
+        >
+          Yes
+        </button>
+
+        <button
+          className="bg-gray-500 hover:bg-gray-400 text-white px-3 py-1 rounded text-sm"
+          onClick={() => toast.dismiss()}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>,
+    { autoClose: false, closeOnClick: false }
+  );
+};
+
+  
   return (
     <div className="flex flex-col gap-6">
       {/* Title */}
@@ -155,28 +213,41 @@ const ExclusionsWhitelist = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-4 border-b border-gray-700">
-        <button
-          className={`px-4 py-2 rounded-t font-medium ${
-            tab === "excluded"
-              ? "bg-[#1f1f1f] text-red-500"
-              : "text-gray-400 hover:text-white"
-          }`}
-          onClick={() => setTab("excluded")}
+      {/* Header with Tabs and Bulk Remove Button */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Tabs */}
+        <div className="flex gap-3">
+          <button
+            className={`px-4 py-2 rounded-lg font-medium ${tab === "excluded"
+              ? "bg-red-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
+            onClick={() => setTab("excluded")}
+          >
+            Excluded
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-medium ${tab === "whitelist"
+              ? "bg-green-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
+            onClick={() => setTab("whitelist")}
+          >
+            Whitelisted
+          </button>
+        </div>
+
+        {/* Bulk Remove Button (changes by tab) */}
+        <button onClick={handleBulkRemove}
+          className={`px-8 py-2 rounded-lg font-medium text-white shadow-md transition-colors duration-200 ${tab === "excluded"
+            ? "bg-green-600 hover:bg-green-500"
+            : "bg-red-600 hover:bg-red-500"
+            }`}
         >
-          Exclusion
-        </button>
-        <button
-          className={`px-4 py-2 rounded-t font-medium ${
-            tab === "whitelist"
-              ? "bg-[#1f1f1f] text-green-500"
-              : "text-gray-400 hover:text-white"
-          }`}
-          onClick={() => setTab("whitelist")}
-        >
-          Whitelisted
+          Bulk Remove
         </button>
       </div>
+
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-end bg-[#1f1f1f] p-4 rounded-lg justify-between">
@@ -273,40 +344,37 @@ const ExclusionsWhitelist = () => {
             </thead>
             <tbody>
               {filteredData.map((c) => {
-                // const creatorId = c.creatorId || c._id;
+                const creatorMongoId =
+                  (c.creator && c.creator._id) || c.creatorId || c._id;
+                const isExcludedTab = tab === "excluded";
+
                 return (
                   <tr
                     key={c._id}
                     className="border-t border-gray-700 hover:bg-[#2a2a2a]"
                   >
-                    <td className="px-4 py-2">{c.creator?.name || c.creator?.username || "Unknown creator"}</td>
+                    {/* ✅ Show creator name or fallback */}
+                    <td className="px-4 py-2">
+                      {c.creator?.name || c.creator?.username || "Unknown creator"}
+                    </td>
                     <td className="px-4 py-2">{c.reason || "-"}</td>
-                    {/* ✅ Show platform instead of addedBy */}
                     <td className="px-4 py-2">{c.platform || "—"}</td>
                     <td className="px-4 py-2">
                       {new Date(c.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2">
-                      {(() => {
-                        const creatorMongoId =
-                          (c.creator && c.creator._id) || c.creatorId || c._id;
-                        return (
-                          <button
-                            className="px-2 py-1 rounded text-sm bg-green-600 hover:bg-green-500 text-white"
-                            disabled={pendingAddIds.has(creatorMongoId)}
-                            onClick={() =>
-                              handleAddWhitelist({
-                                creatorMongoId,
-                                tags: Array.isArray(c.tags) ? c.tags : [],
-                              })
-                            }
-                          >
-                            {pendingAddIds.has(creatorMongoId)
-                              ? "Adding..."
-                              : "Add Whitelist"}
-                          </button>
-                        );
-                      })()}
+                      <button
+                        className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors duration-200
+              ${isExcludedTab
+                            ? "bg-green-600 hover:bg-green-500"
+                            : "bg-red-600 hover:bg-red-500"
+                          }`}
+                        onClick={() => handleDelete(c._id)}
+                      >
+                        {isExcludedTab
+                          ? "Remove from Exclusion"
+                          : "Remove from Whitelist"}
+                      </button>
                     </td>
                   </tr>
                 );
@@ -323,6 +391,7 @@ const ExclusionsWhitelist = () => {
                 </tr>
               )}
             </tbody>
+
           </table>
         </div>
       )}
