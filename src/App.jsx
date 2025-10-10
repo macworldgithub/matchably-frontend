@@ -436,7 +436,7 @@ function BrandAuthChecker({ children }) {
         const token = localStorage.getItem("BRAND_TOKEN");
         if (!token) throw new Error("Missing brand token");
 
-        const res = await axios.get(`${URL}/api/brand/auth/verify`, {
+        const res = await axios.get(`${URL}/brand/auth/verify`, {
           headers: {
             authorization: `Bearer ${token}`,
           },

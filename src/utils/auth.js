@@ -6,7 +6,7 @@ const API_URL = config.BACKEND_URL;
 
 export async function SignInFunction(user) {
   try {
-    const res = await axios.post(`${API_URL}/api/auth/signin`, {
+    const res = await axios.post(`${API_URL}/auth/signin`, {
       email: user.email,
       password: user.password,
     });
@@ -24,7 +24,7 @@ export async function SignInFunction(user) {
 
 export async function SignUpFunction(user) {
   try {
-    const res = await axios.post(`${API_URL}/api/auth/signup`, {
+    const res = await axios.post(`${API_URL}/auth/signup`, {
       name: user.name,
       email: user.email,
       password: user.password,

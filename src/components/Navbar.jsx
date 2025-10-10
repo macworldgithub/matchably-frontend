@@ -8,7 +8,8 @@ import { IoNotificationsOutline } from "react-icons/io5";
 import axios from "axios";
 import moment from "moment";
 import NotificationBell from "./NotificationBell";
-
+import config from "../config";
+const URL = config.BACKEND_URL;
 const Navbar = ({ Islogin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -64,7 +65,7 @@ const Navbar = ({ Islogin }) => {
       (async () => {
         try {
           const token = Cookie.get("token");
-          const res = await axios.get("/api/invitations", {
+          const res = await axios.get(`${config.BACKEND_URL}/invitations`, {
             headers: { Authorization: token },
           });
 
@@ -180,8 +181,8 @@ const Navbar = ({ Islogin }) => {
 
               {/* Invitations - Creator Only */}
               {Islogin && isCreatorLoggedIn && (
-                <Link 
-                  to="/invitations" 
+                <Link
+                  to="/invitations"
                   className="flex items-center gap-1 hover:text-white transition relative"
                 >
                   📩 Invitations
@@ -317,7 +318,7 @@ const Navbar = ({ Islogin }) => {
               >
                 Rewards & Affiliation
               </Link>
-              
+
               {/* Invitations - Creator Only (Mobile) */}
               {Islogin && isCreatorLoggedIn && (
                 <Link
@@ -329,7 +330,7 @@ const Navbar = ({ Islogin }) => {
                   {/* TODO: Add pending count badge */}
                 </Link>
               )}
-              
+
               {/* <Link
       to="/mall"
       onClick={() => setIsOpen(false)}
