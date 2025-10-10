@@ -261,7 +261,7 @@ const ExclusionsWhitelist = () => {
           <table className="w-full text-left text-gray-300">
             <thead className="bg-[#1f1f1f] text-gray-400">
               <tr>
-                <th className="px-4 py-2">Creator ID</th>
+                <th className="px-4 py-2">Creator Name</th>
                 <th className="px-4 py-2">
                   {tab === "excluded" ? "Reason" : "Tag"}
                 </th>
@@ -273,13 +273,13 @@ const ExclusionsWhitelist = () => {
             </thead>
             <tbody>
               {filteredData.map((c) => {
-                const creatorId = c.creatorId || c._id;
+                // const creatorId = c.creatorId || c._id;
                 return (
                   <tr
                     key={c._id}
                     className="border-t border-gray-700 hover:bg-[#2a2a2a]"
                   >
-                    <td className="px-4 py-2">{creatorId}</td>
+                    <td className="px-4 py-2">{c.creator?.name || c.creator?.username || "Unknown creator"}</td>
                     <td className="px-4 py-2">{c.reason || "-"}</td>
                     {/* ✅ Show platform instead of addedBy */}
                     <td className="px-4 py-2">{c.platform || "—"}</td>
