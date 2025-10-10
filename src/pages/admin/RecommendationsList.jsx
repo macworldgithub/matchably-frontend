@@ -5,7 +5,7 @@ import Cookie from "js-cookie";
 import { toast } from "react-toastify";
 
 // Props: creators, brands, campaigns fetched from API
-const RecommendationsList = ({ onRecalculate, onExclude }) => {
+const RecommendationsList = () => {
   const [platformFilter, setPlatformFilter] = useState("All");
   const [scoreRange, setScoreRange] = useState([0, 100]);
   const [brand, setBrand] = useState("");
@@ -30,6 +30,10 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
   const [showExcludeModal, setShowExcludeModal] = useState(false);
   const [excludeReason, setExcludeReason] = useState("");
   const [excludeId, setExcludeId] = useState(null);
+
+  const [excludeType, setExcludeType] = useState("");
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
 
   // Fetch recommendations from API
   useEffect(() => {
@@ -154,11 +158,11 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
     setSelectedRecommendation(null);
   };
 
-  const openConfirmModal = (id, e) => {
-    e.stopPropagation();
-    setConfirmActionId(id);
-    setShowConfirmModal(true);
-  };
+  // const openConfirmModal = (id, e) => {
+  //   e.stopPropagation();
+  //   setConfirmActionId(id);
+  //   setShowConfirmModal(true);
+  // };
 
   const confirmRecalculate = async () => {
     setShowConfirmModal(false);
@@ -175,7 +179,7 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       } else {
         toast.error("Failed to recalculate score");
       }
-    } catch (error) {
+    } catch {
       toast.error("Error recalculating score");
     } finally {
       setConfirmActionId(null);
@@ -187,38 +191,92 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
     e.stopPropagation();
     setExcludeId(id);
     setExcludeReason("");
+    setExcludeType("");
+    setTags([]);
+    setTagInput("");
     setShowExcludeModal(true);
   };
 
-  const confirmExclude = async () => {
-    if (!excludeReason.trim()) {
-      toast.info("Reason is required to exclude a creator");
-      return;
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
     }
+  };
+
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const confirmExclude = async () => {
+    const token = Cookie.get("AdminToken");
+    const adminId = "68e619f740042456e84c9c75";
+    const brandId = "689abbb469ad7dd9150357f0"; 
+    const campaignId = "68d4e14ee995aefec7f1a0f7"; 
+
+    if (!excludeType) {
+    toast.info("Please select an exclusion type");
+    return;
+  }
+
+  if (excludeType === "exclusion" && !excludeReason.trim()) {
+    toast.info("Reason is required for exclusion");
+    return;
+  }
+
+  if (excludeType === "whitelist" && tags.length === 0) {
+    toast.info("Please add at least one tag");
+    return;
+  }
 
     try {
-      const token = Cookie.get("AdminToken");
-      const adminId = "68e619f740042456e84c9c75"; // your admin ID
-      const response = await axios.post(
+    let response;
+
+    if (excludeType === "exclusion") {
+      // ✅ Exclusion API
+      response = await axios.post(
         `${config.BACKEND_URL}/admin/recommendations/exclude/${excludeId}`,
         { adminId, reason: excludeReason },
         { headers: { Authorization: token } }
       );
-      if (response.data.status === "success") {
-        toast.success("Creator excluded successfully!");
-        fetchRecommendations();
-      } else {
-        toast.error(response.data.message || "Failed to exclude creator");
-      }
-    } catch (error) {
-      toast.error("Error excluding creator");
-    } finally {
-      setShowExcludeModal(false);
-      setExcludeId(null);
-      setExcludeReason("");
+    } else if (excludeType === "whitelist") {
+      // ✅ Whitelist API with required fields
+      response = await axios.post(
+        `${config.BACKEND_URL}/admin/recommendations/whitelist/add`,
+        {
+          creatorId: excludeId,
+          brandId,
+          campaignId,
+          tags,
+          adminId,
+        },
+        { headers: { Authorization: token } }
+      );
     }
-  };
 
+    if (response.data.status === "success") {
+      toast.success(
+        excludeType === "exclusion"
+          ? "Creator excluded successfully!"
+          : "Creator added to whitelist successfully!"
+      );
+      fetchRecommendations();
+    } else {
+      toast.error(response.data.message || "Failed to update creator");
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    toast.error("Error updating creator");
+  } finally {
+    setShowExcludeModal(false);
+    setExcludeId(null);
+    setExcludeReason("");
+    setExcludeType("");
+    setTags([]);
+    setTagInput("");
+  }
+};
   // Filtered creators
   const filteredCreators = creators?.filter(
     (c) =>
@@ -598,14 +656,13 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                     <div>
                       <p className="text-gray-400 text-sm">Status</p>
                       <p
-                        className={`font-medium capitalize ${
-                          selectedRecommendation.invitationStatus === "accepted"
-                            ? "text-green-500"
-                            : selectedRecommendation.invitationStatus ===
-                              "pending"
+                        className={`font-medium capitalize ${selectedRecommendation.invitationStatus === "accepted"
+                          ? "text-green-500"
+                          : selectedRecommendation.invitationStatus ===
+                            "pending"
                             ? "text-yellow-500"
                             : "text-gray-300"
-                        }`}
+                          }`}
                       >
                         {selectedRecommendation.invitationStatus?.replace(
                           "_",
@@ -691,19 +748,83 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
       {showExcludeModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="bg-[#1f1f1f] p-6 rounded-lg shadow-lg w-[450px]">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Exclude Creator
-            </h2>
-            <p className="text-gray-300 mb-3">
-              Please provide a reason for excluding this creator:
-            </p>
-            <textarea
-              className="w-full p-2 rounded bg-[#141414] text-white border border-gray-600 mb-4"
-              rows="3"
-              value={excludeReason}
-              onChange={(e) => setExcludeReason(e.target.value)}
-              placeholder="Enter reason here..."
-            />
+            <h2 className="text-xl font-semibold text-white mb-4">Exclude Creator</h2>
+            <p className="text-gray-300 mb-3">Select how you want to exclude this creator:</p>
+
+            <div className="flex gap-3 mb-4">
+              <button
+                className={`flex-1 px-4 py-2 rounded ${excludeType === "exclusion"
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                onClick={() => setExcludeType("exclusion")}
+              >
+                Exclude to Exclusion
+              </button>
+              <button
+                className={`flex-1 px-4 py-2 rounded ${excludeType === "whitelist"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                onClick={() => setExcludeType("whitelist")}
+              >
+                Exclude to Whitelist
+              </button>
+            </div>
+
+            {/* Dynamic Field */}
+            {excludeType === "exclusion" && (
+              <div>
+                <p className="text-gray-300 mb-3">Enter reason for exclusion:</p>
+                <textarea
+                  className="w-full p-2 rounded bg-[#141414] text-white border border-gray-600 mb-4"
+                  rows="3"
+                  value={excludeReason}
+                  onChange={(e) => setExcludeReason(e.target.value)}
+                  placeholder="Enter reason here..."
+                />
+              </div>
+            )}
+
+            {excludeType === "whitelist" && (
+              <div>
+                <p className="text-gray-300 mb-2">Add tags (press Enter or click +):</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    className="flex-1 p-2 rounded bg-[#141414] text-white border border-gray-600"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="Enter a tag"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+                  />
+                  <button
+                    className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+                    onClick={handleAddTag}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-gray-700 text-white px-3 py-1 rounded-full flex items-center gap-2"
+                    >
+                      {tag}
+                      <button
+                        className="text-red-400 hover:text-red-500"
+                        onClick={() => handleRemoveTag(tag)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Buttons */}
             <div className="flex justify-end gap-3">
               <button
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
@@ -712,15 +833,21 @@ const RecommendationsList = ({ onRecalculate, onExclude }) => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-white"
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-white disabled:opacity-50"
                 onClick={confirmExclude}
+                disabled={
+                  !excludeType ||
+                  (excludeType === "exclusion" && !excludeReason.trim()) ||
+                  (excludeType === "whitelist" && tags.length === 0)
+                }
               >
-                Exclude
+                Confirm
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

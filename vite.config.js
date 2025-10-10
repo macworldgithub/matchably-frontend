@@ -8,7 +8,7 @@ export default defineConfig({
     outDir: 'dist', // ✅ Required for correct publish directory
   },
   server: {
-    port: 3007,
+    port: 3000,
     historyApiFallback: true
   },
   optimizeDeps: {
