@@ -27,7 +27,7 @@ const ContentAnalysisPanel = () => {
   const fetchExistingAnalysis = async () => {
     try {
       setLoading((prev) => ({ ...prev, fetching: true }));
-      const response = await axios.get("${URL}/user/content-analysis", {
+      const response = await axios.get(`${URL}/user/content-analysis`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 

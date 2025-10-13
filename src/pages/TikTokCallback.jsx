@@ -61,7 +61,7 @@ const TikTokCallback = () => {
         );
 
         const data = await response.json();
-
+        console.log(data, "DATA");
         if (data.status === "success") {
           toast.success("TikTok account connected successfully!", {
             theme: "dark",
