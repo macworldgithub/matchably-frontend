@@ -133,11 +133,13 @@ export default function OnboardingFlow() {
     if (provider === "tiktok") {
       try {
         const token = Cookies.get("token") || localStorage.getItem("token");
+        console.log(token, "Tik tok token");
         const res = await fetch(`${config.BACKEND_URL}/social/tiktok/auth`, {
           headers: { Authorization: token },
         });
+        console.log(res.body);
         const data = await res.json();
-
+        console.log(data);
         if (data.status === "success") {
           // Redirect to TikTok OAuth
           window.location.href = data.authUrl;

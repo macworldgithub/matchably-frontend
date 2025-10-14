@@ -61,16 +61,16 @@ const TikTokCallback = () => {
         );
 
         const data = await response.json();
-        console.log(data, "DATA");
         if (data.status === "success") {
           toast.success("TikTok account connected successfully!", {
             theme: "dark",
           });
+          console.log(data, "DATA");
 
           // Wait a moment for backend to save, then redirect with success flag
-          setTimeout(() => {
-            navigate("/myaccount?tiktok_connected=success", { replace: true });
-          }, 1000);
+          // setTimeout(() => {
+          //   navigate("/myaccount?tiktok_connected=success", { replace: true });
+          // }, 1000);
         } else {
           toast.error(data.message || "Failed to connect TikTok account", {
             theme: "dark",
