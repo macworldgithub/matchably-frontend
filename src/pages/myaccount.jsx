@@ -530,7 +530,7 @@ const MyAccount = ({ user }) => {
 
       {/* Content Analysis Panel */}
       <div className="max-w-4xl mx-auto mt-8">
-        <ContentAnalysisPanel />
+        <ContentAnalysisPanel user={user} />
       </div>
 
       {/* Password Modal */}
