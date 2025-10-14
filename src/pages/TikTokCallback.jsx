@@ -83,8 +83,7 @@ const TikTokCallback = () => {
         toast.error("Failed to process TikTok authorization", {
           theme: "dark",
         });
-        console.log("2222");
-        navigate("/myaccount", { replace: true });
+        // navigate("/myaccount", { replace: true });
       } finally {
         setProcessing(false);
       }
