@@ -18,6 +18,7 @@ const ContentAnalysisPanel = () => {
     instagram: false,
     tiktok: false,
   });
+  console.log(connectedPlatforms, "Connected Platforms")
   useEffect(() => {
     fetchExistingAnalysis();
     checkConnectedPlatforms();
