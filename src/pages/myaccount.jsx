@@ -21,12 +21,12 @@ import { Link, useSearchParams } from "react-router-dom";
 import ContentAnalysisPanel from "../components/ContentAnalysisPanel";
 
 const MyAccount = ({ user }) => {
+  console.log(user);
   const [searchParams] = useSearchParams();
   const [socialLinks, setSocialLinks] = useState({
     instagramId: user.instagramId || "",
     tiktokId: user.tiktokId || "",
   });
-
   const [passwords, setPasswords] = useState({
     oldPassword: "",
     newPassword: "",
