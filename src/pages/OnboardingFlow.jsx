@@ -11,7 +11,8 @@ export default function OnboardingFlow() {
   const Navigate = useNavigate();
   const location = useLocation();
   const { User, verifyLogin } = useAuthStore();
-
+  console.log(User, "User..........")
+  console.log(verifyLogin, "VerifyLogin............")
   const queryParams = new URLSearchParams(location.search);
   const queryStep = parseInt(queryParams.get("step"), 10);
 
