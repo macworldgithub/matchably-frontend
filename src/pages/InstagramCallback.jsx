@@ -42,7 +42,7 @@ const InstagramCallback = () => {
 
         // Send the authorization code to our backend
         const token = Cookies.get("token") || localStorage.getItem("token");
-
+        console.log(token, 'TOKEN');
         const response = await fetch(
           `${config.BACKEND_URL}/social/instagram/process`,
           {
@@ -59,7 +59,7 @@ const InstagramCallback = () => {
         );
 
         const data = await response.json();
-
+        console.log(data, "DATA");
         if (data.status === "success") {
           toast.success("Instagram account connected successfully!", {
             theme: "dark",
