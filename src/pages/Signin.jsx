@@ -78,9 +78,9 @@ export default function Signin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-
+      console.log(res.body);
       const data = await res.json();
-
+      console.log(data);
       if (data.status === "success") {
         localStorage.setItem("token", data?.token);
         // Also set in cookies for better persistence
