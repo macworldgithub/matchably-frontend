@@ -123,7 +123,11 @@ function Layout() {
     !location.pathname.startsWith("/brand-price");
 
   const authStore = useAuthStore();
+  console.log(authStore, "Auth Store");
+  console.log(isAdminRoute, "Admin");
+  console.log(isBrandRoute, "Brand route");
   const isLogin = !isAdminRoute && !isBrandRoute ? authStore.isLogin : null;
+
   const User = !isAdminRoute && !isBrandRoute ? authStore.User : null;
   console.log(User, "user...");
   const verifyLogin =
