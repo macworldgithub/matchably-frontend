@@ -228,6 +228,7 @@ export default function Signin() {
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               const idToken = credentialResponse.credential;
+              console.log(idToken, "ID Token");
               handleGoogleLogin(idToken);
             }}
             onError={() => {
