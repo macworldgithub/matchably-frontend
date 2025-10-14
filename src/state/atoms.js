@@ -12,6 +12,7 @@ const useAuthStore = create((set) => ({
   isLogin: false,
   User: {},
   verifyLogin: async () => {
+    console.log("121212121");
     try {
       // Token check
       if (Cookie.get("token") === "undefined" || !Cookie.get("token")) {
@@ -21,6 +22,7 @@ const useAuthStore = create((set) => ({
       }
 
       const token = Cookie.get("token") || localStorage.getItem("token");
+      console.log(token, "TOKEN.....")
       const res = await axios.get(`${BACKEND_URL}/auth/verify`, {
         headers: {
           Authorization: token, // ✅ capital A
