@@ -125,6 +125,7 @@ function Layout() {
   const authStore = useAuthStore();
   const isLogin = !isAdminRoute && !isBrandRoute ? authStore.isLogin : null;
   const User = !isAdminRoute && !isBrandRoute ? authStore.User : null;
+  console.log(User, "user...");
   const verifyLogin =
     !isAdminRoute && !isBrandRoute ? authStore.verifyLogin : null;
 
