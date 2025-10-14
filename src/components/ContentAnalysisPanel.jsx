@@ -1,12 +1,10 @@
-// src/components/ContentAnalysisPanel.jsx
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-// import config from "./config";
 import config from "../config";
 const URL = config.BACKEND_URL;
 
-const ContentAnalysisPanel = () => {
+const ContentAnalysisPanel = ({ user }) => {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState({
     instagram: false,
@@ -18,9 +16,20 @@ const ContentAnalysisPanel = () => {
     instagram: false,
     tiktok: false,
   });
-  console.log(connectedPlatforms, "Connected Platforms")
+
+  // 🧠 Initialize connected platforms from user if available
+  useEffect(() => {
+    if (user && user.snsConnected && user.sns) {
+      setConnectedPlatforms({
+        instagram: !!user.sns.instagram,
+        tiktok: !!user.sns.tiktok,
+      });
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchExistingAnalysis();
+    // Optionally update platform connection states from API
     checkConnectedPlatforms();
   }, []);
 
@@ -28,7 +37,7 @@ const ContentAnalysisPanel = () => {
     try {
       setLoading((prev) => ({ ...prev, fetching: true }));
       const response = await axios.get(`${URL}/user/content-analysis`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: localStorage.getItem("token") },
       });
 
       if (response.data.success) {
@@ -48,15 +57,16 @@ const ContentAnalysisPanel = () => {
       const response = await axios.get(
         `${config.BACKEND_URL}/user/content-analysis/social-connections`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: localStorage.getItem("token") },
         }
       );
 
       if (response.data.success) {
-        setConnectedPlatforms({
-          instagram: response.data.data.instagram?.connected || false,
-          tiktok: response.data.data.tiktok?.connected || false,
-        });
+        // 🧩 Merge API result with user-based data (so user.sns.* takes priority)
+        setConnectedPlatforms((prev) => ({
+          instagram: prev.instagram || response.data.data.instagram?.connected,
+          tiktok: prev.tiktok || response.data.data.tiktok?.connected,
+        }));
       }
     } catch (error) {
       console.error("Failed to check connected platforms:", error);
@@ -76,20 +86,21 @@ const ContentAnalysisPanel = () => {
         endpoint,
         {},
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: localStorage.getItem("token") },
         }
       );
 
       if (response.data.success) {
         toast.success(response.data.message);
-        await fetchExistingAnalysis(); // Refresh the analysis data
+        await fetchExistingAnalysis();
       } else {
         toast.error(response.data.message || "Analysis failed");
       }
     } catch (error) {
       console.error(`${platform} analysis failed:`, error);
       toast.error(
-        error.response?.data?.message || `Failed to analyze ${platform} content`
+        error.response?.data?.message ||
+          `Failed to analyze ${platform} content`
       );
     } finally {
       setLoading((prev) => ({ ...prev, [platform]: false }));
@@ -101,7 +112,7 @@ const ContentAnalysisPanel = () => {
       const response = await axios.delete(
         `${config.BACKEND_URL}/user/content-analysis`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: localStorage.getItem("token") },
         }
       );
 
@@ -126,14 +137,12 @@ const ContentAnalysisPanel = () => {
 
   if (loading.fetching) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-20 bg-gray-200 rounded mb-4"></div>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
+      <div className="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+        <div className="h-20 bg-gray-200 rounded mb-4"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
         </div>
       </div>
     );
@@ -161,7 +170,7 @@ const ContentAnalysisPanel = () => {
         )}
       </div>
 
-      {/* Connected Platforms Status */}
+      {/* Connected Platforms */}
       <div className="mb-6">
         <h4 className="text-sm font-medium text-gray-700 mb-3">
           Connected Platforms
@@ -186,111 +195,7 @@ const ContentAnalysisPanel = () => {
         </div>
       </div>
 
-      {/* Analysis Results */}
-      {analysis && (
-        <div className="mb-6">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-medium text-gray-700">
-                Overall Content Score
-              </h4>
-              <span className="text-2xl font-bold text-indigo-600">
-                {analysis.overallScore}/100
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${analysis.overallScore}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Categories and Tags */}
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <h5 className="text-sm font-medium text-gray-700 mb-2">
-                Content Categories
-              </h5>
-              <div className="flex flex-wrap gap-1">
-                {analysis.categories.length > 0 ? (
-                  analysis.categories.map((category, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-                    >
-                      {category}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-gray-500">
-                    No categories detected
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h5 className="text-sm font-medium text-gray-700 mb-2">
-                Top Tags
-              </h5>
-              <div className="flex flex-wrap gap-1">
-                {analysis.tags.length > 0 ? (
-                  analysis.tags.slice(0, 10).map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
-                    >
-                      #{tag}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-gray-500">
-                    No tags detected
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Platform Breakdown */}
-          {analysis.platforms.length > 0 && (
-            <div className="mb-4">
-              <h5 className="text-sm font-medium text-gray-700 mb-3">
-                Platform Analysis
-              </h5>
-              <div className="space-y-2">
-                {analysis.platforms.map((platform, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <span className="capitalize text-sm font-medium text-gray-700">
-                        {platform.platform}
-                      </span>
-                      <span className="ml-2 text-sm text-gray-500">
-                        Score: {platform.contentScore}/100
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {formatDate(platform.lastAnalyzed)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {analysis.lastUpdated && (
-            <p className="text-xs text-gray-500">
-              Last updated: {formatDate(analysis.lastUpdated)}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Action Buttons */}
+      {/* Buttons */}
       <div className="space-y-3">
         <div className="flex gap-3">
           <button
