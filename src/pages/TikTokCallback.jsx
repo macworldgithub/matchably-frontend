@@ -76,7 +76,7 @@ const TikTokCallback = () => {
             theme: "dark",
           });
           console.log("1111");
-          navigate("/myaccount", { replace: true });
+          // navigate("/myaccount", { replace: true });
         }
       } catch (err) {
         console.error("TikTok callback processing error:", err);
