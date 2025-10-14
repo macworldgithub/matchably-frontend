@@ -2,79 +2,89 @@
 
 import axios from "axios";
 import { create } from "zustand";
-import Cookie from "js-cookie";
 import config from "../config";
-import { User } from "lucide-react";
 
 const BACKEND_URL = config.BACKEND_URL;
 
 const useAuthStore = create((set) => ({
   isLogin: false,
   User: {},
+
   verifyLogin: async () => {
-    console.log("121212121");
+    console.log("Verifying login...");
+
     try {
-      // Token check
-      if (Cookie.get("token") === "undefined" || !Cookie.get("token")) {
-        Cookie.remove("token");
+      const token = localStorage.getItem("token");
+
+      // Token validation
+      if (!token || token === "undefined") {
+        localStorage.removeItem("token");
         set({ isLogin: false });
         return;
       }
 
-      const token = Cookie.get("token") || localStorage.getItem("token");
-      console.log(token, "TOKEN.....")
+      console.log("TOKEN:", token);
+
       const res = await axios.get(`${BACKEND_URL}/auth/verify`, {
         headers: {
-          Authorization: token, // ✅ capital A
+          Authorization: token, // ✅ Correct header
         },
       });
 
-      console.log(res.data);
-      set({ isLogin: res.data.status === "success" });
+      console.log("Verify response:", res.data);
 
       if (res.data.status === "success") {
         const user = res.data.user;
-        set({ User: user });
+        set({
+          isLogin: true,
+          User: user,
+        });
 
-        // Ensure cookies are in sync
-        Cookie.set("token", token, { expires: 7 }); // Set for 7 days
+        // ✅ Ensure token stays in localStorage
+        localStorage.setItem("token", token);
 
-        // ✅ Redirect only if we're NOT already on onboarding
-        const currentPath = window.location.pathname + window.location.search;
-
+        // Optional onboarding redirect logic
+        // const currentPath = window.location.pathname + window.location.search;
         // if (
         //   (!user.submittedUrls || user.submittedUrls.length < 3) &&
         //   !currentPath.startsWith("/onboarding")
         // ) {
         //   window.location.replace("/onboarding");
-        //   return;
         // }
+      } else {
+        set({ isLogin: false });
       }
     } catch (err) {
       console.error("verifyLogin failed:", err);
       set({ isLogin: false });
+      localStorage.removeItem("token");
     }
   },
 
   setSignin: async (state) => {
     set({ isLogin: state });
   },
+
   setBrand: async (brand) => {
     set({ brand: brand });
   },
+
   setUser: (user) => {
     set({ User: user, isLogin: true });
-    // Ensure we have the user logged in state when user data is set
-    const token = Cookie.get("token") || localStorage.getItem("token");
+
+    // ✅ Persist token if it exists
+    const token = localStorage.getItem("token");
     if (token) {
-      Cookie.set("token", token, { expires: 7 });
+      localStorage.setItem("token", token);
     }
   },
 }));
 
 const useCompaign = create((set) => ({
   Campaigns: [],
+
   setToEmpty: () => set({ Campaigns: [] }),
+
   EditCampaign: async (index, campaign) => {
     set((state) => {
       const updatedCampaigns = [...state.Campaigns];
@@ -85,6 +95,7 @@ const useCompaign = create((set) => ({
       return { Campaigns: updatedCampaigns };
     });
   },
+
   DeleteCampaign: async (index) => {
     set((state) => {
       const updatedCampaigns = [...state.Campaigns];
@@ -131,10 +142,11 @@ const useCompaign = create((set) => ({
       ],
     }));
   },
+
   SetCompaigns: async (compaigns) => {
     console.log(compaigns);
     set((state) => ({
-      Campaigns: [...state.Campaigns, ...compaigns], // Correctly refer to the state
+      Campaigns: [...state.Campaigns, ...compaigns],
     }));
   },
 }));
