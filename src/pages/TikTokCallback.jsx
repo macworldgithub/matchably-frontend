@@ -75,15 +75,14 @@ const TikTokCallback = () => {
           toast.error(data.message || "Failed to connect TikTok account", {
             theme: "dark",
           });
-          console.log("1111");
-          // navigate("/myaccount", { replace: true });
+          navigate("/myaccount", { replace: true });
         }
       } catch (err) {
         console.error("TikTok callback processing error:", err);
         toast.error("Failed to process TikTok authorization", {
           theme: "dark",
         });
-        // navigate("/myaccount", { replace: true });
+        navigate("/myaccount", { replace: true });
       } finally {
         setProcessing(false);
       }
